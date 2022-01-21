@@ -1,0 +1,8 @@
+# IDE files
+.vscode
+
+# Make products
+out
+*.out
+*.o
+*.d
