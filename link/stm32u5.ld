@@ -1,7 +1,14 @@
 MEMORY {
-  FLASH   (RX) : ORIGIN = 0x08000000, LENGTH = 32K/* TODO */
-  SRAM    (RWX) : ORIGIN = 0x20000000, LENGTH = 4K/* TODO */
-  /* Add XIP, PSRAM */
+  ROM_BANK1  (RX) : ORIGIN = 0x08000000, LENGTH = 1M
+  ROM_BANK2  (RX) : ORIGIN = 0x08100000, LENGTH = 1M
+
+  /* NS - Secute-Non-Secure */
+  NS_SRAM1 (RWX) : ORIGIN = 0x20000000, LENGTH = (192K + 64K + 512K)
+  NS_SRAM4 (RWX) : ORIGIN = 0x28000000, LENGTH = 16K
+
+  /* NSC - Secute-Non-Secure callable */
+  NSC_SRAM1 (RWX) : ORIGIN = 0x30000000, LENGTH = (192K + 64K + 512K)
+  NSC_SRAM4 (RWX) : ORIGIN = 0x38000000, LENGTH = 16K 
 }
 
 ENTRY(handler_reset);
@@ -11,53 +18,36 @@ SECTIONS
   .text :
   {
     . = ALIGN(4);
-    _text_end = .;
-    __text_end__ = _text_end;
 
-    KEEP(*(.init_vec));
-    *(.text)
-    *(.text*)
-    *(.rodata)
-    *(.rodata*)
+    KEEP(*(.init_vec)); /* Vector table */
+
+    *(.text*)           /* Program code */
     . = ALIGN(4);
 
-    _text_end = .;
-    __text_end__ = _text_end;
-  } > FLASH
+    *(.rodata*)         /* Read-only data */
+    . = ALIGN(4);
+  } > ROM_BANK1
 
   .data :
   {
-    _data_begin = .;
-    __data_begin__ = _data_begin;
-
-    *(.data)
-    *(.data*)
+    *(.data*)          /* Read-write initialized data */
+    *(.ramtext*)       /* "text" functions to run in ram */
     . = ALIGN(4);
     
-    _data_end = .;
-    __data_end__ = _data_end;
-  } > SRAM
+    __data_end__ = .;
+  } > NS_SRAM1
 
   .bss :
   {
-    _bss_begin = .;
-    __bss_start__ = _bss_begin;
-
-    *(.bss)
     *(.bss*)
     *(COMMON)
     . = ALIGN(4);
     
-    _bss_end = .;
-    __bss_end__ = _bss_end;
-  } > SRAM
+    __bss_end__  = .;
+  } > NS_SRAM1
 
-  _stack_size = 1024;
-  _stack_end = ORIGIN(SRAM) + LENGTH(SRAM);
-  _stack_begin = _stack_end - _stack_size;
-  . = _stack_begin;
-  ._stack :
-  {
-    . = . + _stack_size;
-  } > SRAM
+  . = ALIGN(4);
+  end = .;
 }
+
+PROVIDE(__stack_end__ = ORIGIN(NS_SRAM1) + LENGTH(NS_SRAM1));
