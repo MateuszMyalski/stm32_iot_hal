@@ -58,4 +58,4 @@ clean:
 
 # SELECT TARGET
 # TODO(Mateusz) Currently hardcoded stm32u5 target
-include $(APPS_PATH)/stm32u5/bootloader/Makefile.target
+include $(APPS_PATH)/stm32u5/basic/Makefile.target

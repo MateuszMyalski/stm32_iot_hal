@@ -1,6 +1,6 @@
 # -*- MakeFile -*-
 
-TARGET := stm32u5_bootloader
+TARGET := stm32u5_basic
 MARCH  := cortex-m33
 
 CFLAGS   := -c \
@@ -19,7 +19,7 @@ LFLAGS   := -mcpu=$(MARCH) \
 			-lgcc \
 			-T$(LINK_PATH)/$(LDSCRIPT)
 
-CFILES   := main.c
+CFILES   := stm32u5_startup.c
 
 OBJS := $(patsubst %.c, %.o, $(CFILES))
 OBJS += $(patsubst %.S, %.o, $(SFILES))
@@ -34,13 +34,14 @@ $(TARGET).hex: $(TARGET).elf
 	@echo "[Generating hex:" $@"]"
 	@$(OC) -O ihex $(OUT_PATH)/$(TARGET).elf $(OUT_PATH)/$(TARGET).hex
 	@$(OD) -D $(OUT_PATH)/$(TARGET).elf > $(OUT_PATH)/obj-dump-$(TARGET).lst
+	@$(OD) -t $(OUT_PATH)/$(TARGET).elf > $(OUT_PATH)/obj-dump-$(TARGET).map
 
-%.o: $(APPS_PATH)/stm32u5/bootloader/%.c
+%.o: $(APPS_PATH)/stm32u5/basic/%.c
 	@echo "[Compiling:" $@"]"
 	@mkdir -p $(OBJ_PATH)
 	@$(CC) $(CFLAGS) $< -o $(OBJ_PATH)/$@
 
-%.o: $(APPS_PATH)/stm32u5/bootloader/%.S
+%.o: $(APPS_PATH)/stm32u5/basic/%.S
 	@echo "[Syntezing:" $@"]"
 	@mkdir -p $(OBJ_PATH)
 	@$(CC) -x assembler-with-cpp $(SFLAGS) $< -o $(OBJ_PATH)/$@
