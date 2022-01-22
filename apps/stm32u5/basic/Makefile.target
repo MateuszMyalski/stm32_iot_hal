@@ -2,6 +2,9 @@
 
 TARGET := stm32u5_basic
 MARCH  := cortex-m33
+PROJECT_PATH := $(APPS_PATH)/stm32u5/basic
+
+INCLUDES := -I$(PROJECT_PATH)/include
 
 CFLAGS   := -c \
 			-mcpu=$(MARCH) \
@@ -13,37 +16,41 @@ CFLAGS   := -c \
 LDSCRIPT := stm32u5.ld
 LFLAGS   := -mcpu=$(MARCH) \
 			-mthumb \
-			-Os \
-			--specs=nosys.specs \
-			-nostdlib \
+			-O0 \
+			--specs=nano.specs \
 			-lgcc \
+			-Wl,--print-memory-usage \
 			-T$(LINK_PATH)/$(LDSCRIPT)
 
-CFILES   := stm32u5_startup.c
+CFILES   := stm32u5_startup.c \
+			main.c \
+			syscalls.c
 
-OBJS := $(patsubst %.c, %.o, $(CFILES))
-OBJS += $(patsubst %.S, %.o, $(SFILES))
+OBJS := $(patsubst %.c, $(OBJ_PATH)/%.o, $(CFILES))
+OBJS += $(patsubst %.S, $(OBJ_PATH)/%.o, $(SFILES))
 
 .PHONY: all
 all : $(TARGET).hex
+
 $(TARGET).elf: $(OBJS)
 	@echo "[Linking:" $@"]"
-	@$(CC) $(OBJ_PATH)/$^ $(LFLAGS) -o $(OUT_PATH)/$@
+	@$(CC) $^ $(LFLAGS) -o $(OUT_PATH)/$@
 
 $(TARGET).hex: $(TARGET).elf
 	@echo "[Generating hex:" $@"]"
 	@$(OC) -O ihex $(OUT_PATH)/$(TARGET).elf $(OUT_PATH)/$(TARGET).hex
 	@$(OD) -D $(OUT_PATH)/$(TARGET).elf > $(OUT_PATH)/obj-dump-$(TARGET).lst
 	@$(OD) -t $(OUT_PATH)/$(TARGET).elf > $(OUT_PATH)/obj-dump-$(TARGET).map
+	@$(OD) -h $(OUT_PATH)/$(TARGET).elf > $(OUT_PATH)/obj-dump-sections-$(TARGET).map
 
-%.o: $(APPS_PATH)/stm32u5/basic/%.c
+$(OBJ_PATH)/%.o: $(PROJECT_PATH)/%.c
 	@echo "[Compiling:" $@"]"
 	@mkdir -p $(OBJ_PATH)
-	@$(CC) $(CFLAGS) $< -o $(OBJ_PATH)/$@
+	@$(CC) $(CFLAGS) $(INCLUDES) $< -o $@
 
-%.o: $(APPS_PATH)/stm32u5/basic/%.S
+$(OBJ_PATH)/%.o: $(PROJECT_PATH)/%.S
 	@echo "[Syntezing:" $@"]"
 	@mkdir -p $(OBJ_PATH)
-	@$(CC) -x assembler-with-cpp $(SFLAGS) $< -o $(OBJ_PATH)/$@
+	@$(CC) -x assembler-with-cpp $(INCLUDES) $(SFLAGS) $< -o $@
 
 
