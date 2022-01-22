@@ -22,6 +22,7 @@ ENTRY(_entry);
 SECTIONS
 {  
   STACK_SIZE = 0x2000; /* 8 kB */
+  HEAP_SIZE = 0x2000; /* 8 kB */
 
   .text :
   {
@@ -35,6 +36,8 @@ SECTIONS
     . = ALIGN(4);
     _etext = .;
   } > ROM
+
+  _la_data = LOADADDR(.data);
 
   .data :
   {
@@ -52,11 +55,17 @@ SECTIONS
   {
     . = ALIGN(4);
     _sbss = .;
+    __bss_start__ = _sbss; /* libc variable */
     *(.bss)
     *(.bss.*)
     *(COMMON)
     . = ALIGN(4);
     _ebss = .;
+    __bss_end__ = _ebss;  /* libc variable */
+
+    . = . + HEAP_SIZE;    /* We want to have controll of heap and stack sizes */
+    . = ALIGN(4);
+    _eheap = .;
   } > RAM
 
   .stack (NOLOAD):
