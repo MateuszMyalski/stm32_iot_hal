@@ -1,3 +1,0 @@
-[submodule "tools/stlink-org"]
-	path = tools/stlink-org
-	url = https://github.com/stlink-org/stlink
