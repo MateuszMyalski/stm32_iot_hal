@@ -1,0 +1,68 @@
+# -*- MakeFile -*-
+
+TARGET := stm32u585xx_base
+MARCH  := cortex-m33
+PROJECT_PATH := $(APPS_PATH)/stm32u5/u585xx_base
+
+INCLUDES := -I$(PROJECT_PATH)/include \
+			-I$(CORE_PATH)/CMSIS
+
+CFLAGS   := -c \
+			-mcpu=$(MARCH) \
+			-mthumb \
+			-O0 \
+			-Wall \
+			-Wl,--gc-sections
+
+SFLAGS   := -c \
+			-mcpu=$(MARCH) \
+			-mthumb \
+			-O0 \
+			-Wall \
+			-Wl,--gc-sections
+
+LDSCRIPT := STM32U585xx_FLASH.ld
+LFLAGS   := -mcpu=$(MARCH) \
+			-mthumb \
+			-O0 \
+			--specs=nano.specs \
+			-lgcc \
+			-Wl,--print-memory-usage \
+			-T$(LINK_PATH)/stm32u5/$(LDSCRIPT)
+
+SFILES   := startup_stm32u585xx.s
+
+CFILES   := main.c \
+			syscalls.c \
+			system_stm32u5xx.c
+
+include $(PROJECT_PATH)/Makefile.cfg
+
+OBJS := $(patsubst %.c, $(OBJ_PATH)/%.o, $(CFILES))
+OBJS += $(patsubst %.s, $(OBJ_PATH)/%.o, $(SFILES))
+
+.PHONY: all
+all : $(TARGET).hex
+
+$(TARGET).elf: $(OBJS)
+	@echo "[Linking:" $@"]"
+	@$(CC) $^ $(LFLAGS) -o $(OUT_PATH)/$@
+
+$(TARGET).hex: $(TARGET).elf
+	@echo "[Generating hex:" $@"]"
+	@$(OC) -O ihex $(OUT_PATH)/$(TARGET).elf $(OUT_PATH)/$(TARGET).hex
+	@$(OD) -D $(OUT_PATH)/$(TARGET).elf > $(OUT_PATH)/obj-dump-$(TARGET).lst
+	@$(OD) -t $(OUT_PATH)/$(TARGET).elf > $(OUT_PATH)/obj-dump-$(TARGET).map
+	@$(OD) -h $(OUT_PATH)/$(TARGET).elf > $(OUT_PATH)/obj-dump-sections-$(TARGET).map
+
+$(OBJ_PATH)/%.o: $(PROJECT_PATH)/%.c
+	@echo "[Compiling:" $@"]"
+	@mkdir -p $(OBJ_PATH)
+	@$(CC) $(CFLAGS) $(INCLUDES) $< -o $@
+
+$(OBJ_PATH)/%.o: $(PROJECT_PATH)/%.s
+	@echo "[Syntezing:" $@"]"
+	@mkdir -p $(OBJ_PATH)
+	@$(CC) -x assembler-with-cpp $(INCLUDES) $(SFLAGS) $< -o $@
+
+

@@ -1,8 +1,8 @@
 # -*- MakeFile -*-
 
-TARGET := stm32u5_basic
+TARGET := stm32u5_sandbox
 MARCH  := cortex-m33
-PROJECT_PATH := $(APPS_PATH)/stm32u5/basic
+PROJECT_PATH := $(APPS_PATH)/stm32u5/sandbox
 
 INCLUDES := -I$(PROJECT_PATH)/include
 
@@ -13,14 +13,14 @@ CFLAGS   := -c \
 			-Wall \
 			-Wl,--gc-sections
 
-LDSCRIPT := stm32u5.ld
+LDSCRIPT := STM32U585xx_minimal.ld
 LFLAGS   := -mcpu=$(MARCH) \
 			-mthumb \
 			-O0 \
 			--specs=nano.specs \
 			-lgcc \
 			-Wl,--print-memory-usage \
-			-T$(LINK_PATH)/$(LDSCRIPT)
+			-T$(LINK_PATH)/stm32u5/$(LDSCRIPT)
 
 CFILES   := stm32u5_startup.c \
 			main.c \
