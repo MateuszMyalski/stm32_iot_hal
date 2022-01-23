@@ -19,6 +19,7 @@ OBJ_PATH := $(OUT_PATH)/obj
 
 APPS_PATH := $(CURDIR)/apps
 LINK_PATH := $(CURDIR)/link
+CORE_PATH := $(CURDIR)/core
 
 # INIT TARGET FLAGS
 LDSCRIPT := $(NULL)
@@ -58,4 +59,4 @@ clean:
 
 # SELECT TARGET
 # TODO(Mateusz) Currently hardcoded stm32u5 target
-include $(APPS_PATH)/stm32u5/basic/Makefile.target
+include $(APPS_PATH)/stm32u5/u585xx_base/Makefile.target

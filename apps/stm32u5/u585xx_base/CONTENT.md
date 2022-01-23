@@ -1,0 +1,1 @@
+Most of base related files are forks from [STM32CubeU5]: https://github.com/STMicroelectronics/STM32CubeU5 repository. This project is base/template for future apps & projects.
