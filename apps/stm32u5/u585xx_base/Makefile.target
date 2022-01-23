@@ -11,6 +11,7 @@ CFLAGS   := -c \
 			-mcpu=$(MARCH) \
 			-mthumb \
 			-O0 \
+			-g \
 			-Wall \
 			-Wl,--gc-sections
 
