@@ -19,6 +19,7 @@ SFLAGS   := -c \
 			-mcpu=$(MARCH) \
 			-mthumb \
 			-O0 \
+			-g \
 			-Wall \
 			-Wl,--gc-sections
 
@@ -26,6 +27,7 @@ LDSCRIPT := STM32U585xx_FLASH.ld
 LFLAGS   := -mcpu=$(MARCH) \
 			-mthumb \
 			-O0 \
+			-g \
 			--specs=nano.specs \
 			-lgcc \
 			-Wl,--print-memory-usage \
