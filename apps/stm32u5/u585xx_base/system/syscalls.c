@@ -2,31 +2,54 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
+#ifndef EOF
+#define EOF (-1)
+#endif
+
 extern int errno;
+char *__env[1] = {0};
+char **environ = __env;
 
 extern int __io_putchar(int ch) __attribute__((weak));
 extern int __io_getchar(void) __attribute__((weak));
 
-char *__env[1] = {0};
-char **environ = __env;
+int putchar(signed int c) {
+    // No implementation
+    return 1;
+}
+
+int puts(const char *string) {
+    int i = 0;
+    while (string[i])  // standard c idiom for looping through a null-terminated string
+    {
+        if (putchar(string[i]) == EOF) {
+            return EOF;
+        }
+        i++;
+    }
+
+    // Add new line right after string null terminator
+    if (putchar('\n') == EOF) {
+        return EOF;
+    }
+
+    return 1;
+}
 
 int _kill(int pid, int sig) {
     errno = EINVAL;
     return -1;
 }
 
-void _exit(int status)
-{
+void _exit(int status) {
     _kill(status, -1);
-    while(1)
-    {
+    while (1) {
         __asm("NOP");
         // Hang the device
     }
 }
 
-caddr_t _sbrk(int incr)
-{
+caddr_t _sbrk(int incr) {
     extern char *_end;
     extern char *_eheap;
     static char *heap_end;
@@ -48,10 +71,8 @@ caddr_t _sbrk(int incr)
     return (caddr_t)prev_heap_end;
 }
 
-int _write(int file, char *ptr, int len)
-{
-    for (int data_idx = 0; data_idx < len; data_idx++)
-    {
+int _write(int file, char *ptr, int len) {
+    for (int data_idx = 0; data_idx < len; data_idx++) {
         __io_putchar(*ptr++);
     }
 
@@ -59,18 +80,16 @@ int _write(int file, char *ptr, int len)
 }
 
 int _read(int file, char *ptr, int len) {
-  for (int data_idx = 0; data_idx < len; data_idx++)
-    {
+    for (int data_idx = 0; data_idx < len; data_idx++) {
         *ptr++ = __io_getchar();
     }
 
-  return len;
+    return len;
 }
 
 int _close(int file) { return -1; }
 
-int _fstat(int file, struct stat *st)
-{
+int _fstat(int file, struct stat *st) {
     st->st_mode = S_IFCHR;
     return 0;
 }
