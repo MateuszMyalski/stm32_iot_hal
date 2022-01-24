@@ -60,3 +60,27 @@ clean:
 # SELECT TARGET
 # TODO(Mateusz) Currently hardcoded stm32u5 target
 include $(APPS_PATH)/stm32u5/u585xx_base/Makefile.target
+
+.PHONY: all
+all : $(TARGET).hex
+
+$(TARGET).elf: $(OBJS)
+	@echo "[Linking:" $@"]"
+	@$(CC) $^ $(LFLAGS) -o $(OUT_PATH)/$@
+
+$(TARGET).hex: $(TARGET).elf
+	@echo "[Generating hex:" $@"]"
+	@$(OC) -O ihex $(OUT_PATH)/$(TARGET).elf $(OUT_PATH)/$(TARGET).hex
+	@$(OD) -D $(OUT_PATH)/$(TARGET).elf > $(OUT_PATH)/obj-dump-$(TARGET).lst
+	@$(OD) -t $(OUT_PATH)/$(TARGET).elf > $(OUT_PATH)/obj-dump-$(TARGET).map
+	@$(OD) -h $(OUT_PATH)/$(TARGET).elf > $(OUT_PATH)/obj-dump-sections-$(TARGET).map
+
+$(OBJ_PATH)/%.o: $(PROJECT_PATH)/%.c
+	@echo "[Compiling:" $@"]"
+	@mkdir -p $(dir $@)
+	@$(CC) $(CFLAGS) $(INCLUDES) $< -o $@
+
+$(OBJ_PATH)/%.o: $(PROJECT_PATH)/%.s
+	@echo "[Syntezing:" $@"]"
+	@mkdir -p $(dir $@)
+	@$(CC) -x assembler-with-cpp $(INCLUDES) $(SFLAGS) $< -o $@
