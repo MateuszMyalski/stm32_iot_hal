@@ -39,6 +39,14 @@ int hal_gpio_close(GPIO_TypeDef *GPIO_port) {
     if (sanity_check(GPIO_port, 0) != 0) {
         return -1;
     }
+
+    // Translate port A - I -> 0 - 9
+    uint32_t port_idx = (uint32_t)GPIO_port - (uint32_t)GPIOA_BASE;
+    port_idx /= GPIO_REG_SIZE;
+
+    // Enable AHB bus
+    SET_BIT(RCC->AHB2RSTR1, 1 << port_idx);
+
     return 0;
 }
 
@@ -53,6 +61,7 @@ int hal_gpio_ioctl(GPIO_TypeDef *GPIO_port, uint32_t GPIO_pin, gpio_ioctl_t gpio
 
             CLEAR_BIT(GPIO_port->MODER, 2UL << MODER_pos);
             CLEAR_BIT(GPIO_port->MODER, 1UL << MODER_pos);
+
             break;
         }
         case gpio_ioctl_output: {
@@ -60,14 +69,25 @@ int hal_gpio_ioctl(GPIO_TypeDef *GPIO_port, uint32_t GPIO_pin, gpio_ioctl_t gpio
 
             CLEAR_BIT(GPIO_port->MODER, 2UL << MODER_pos);
             SET_BIT(GPIO_port->MODER, 1UL << MODER_pos);
+
             break;
         }
-        case gpio_ioctl_analog_input:
-            return 1;
+        case gpio_ioctl_analog_input: {
+            int MODER_pos = GPIO_pin << 1;
+
+            SET_BIT(GPIO_port->MODER, 2UL << MODER_pos);
+            SET_BIT(GPIO_port->MODER, 1UL << MODER_pos);
+
             break;
-        case gpio_ioctl_alternate:
-            return 1;
+        }
+        case gpio_ioctl_alternate: {
+            int MODER_pos = GPIO_pin << 1;
+
+            SET_BIT(GPIO_port->MODER, 2UL << MODER_pos);
+            CLEAR_BIT(GPIO_port->MODER, 1UL << MODER_pos);
+
             break;
+        }
         case gpio_ioctl_push_pull:
             return 1;
             break;
@@ -97,6 +117,7 @@ int hal_gpio_ioctl(GPIO_TypeDef *GPIO_port, uint32_t GPIO_pin, gpio_ioctl_t gpio
             break;
 
         default:
+            return 1;
             break;
     }
     return 0;
@@ -122,6 +143,7 @@ int hal_gpio_write(GPIO_TypeDef *GPIO_port, uint32_t GPIO_pin, bool value) {
 
     return 0;
 }
+
 bool hal_gpio_read(GPIO_TypeDef *GPIO_port, uint32_t GPIO_pin) {
     // No sanity check
 

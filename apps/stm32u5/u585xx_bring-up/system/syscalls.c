@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include "stm32u585xx.h"
 
 #ifndef EOF
 #define EOF (-1)
@@ -13,10 +14,17 @@ char **environ = __env;
 extern int __io_putchar(int ch) __attribute__((weak));
 extern int __io_getchar(void) __attribute__((weak));
 
+#ifdef USE_ITM_PRINT
+int putchar(signed int c) {
+    ITM_SendChar(c);
+    return 1;
+}
+#else
 int putchar(signed int c) {
     // No implementation
     return 1;
 }
+#endif // USE_ITM_PRINT
 
 int puts(const char *string) {
     int i = 0;
