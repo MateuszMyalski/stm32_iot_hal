@@ -167,6 +167,7 @@ SECTIONS
     . = ALIGN(8);
     PROVIDE ( end = . );
     PROVIDE ( _end = . );
+    PROVIDE ( __end__ = . ); /* Need for rdimon-crt0 */
     . = . + _Min_Heap_Size;
     PROVIDE ( _eheap = . ); /* Provide variable for _sbrk heap overflow check */
     . = . + _Min_Stack_Size;

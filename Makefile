@@ -46,10 +46,7 @@ info:
 	@echo "[S FLAGS]:" $(SFLAGS)
 	@echo "[C FLAGS]:" $(CFLAGS)
 	@echo "[CPP FLAGS]:" $(CPPFLAGS)
-	@echo "[INCLUDES]:" $(INCLUDES)
 	@echo "[LINKER SCRIPT]:" $(LDSCRIPT)
-	@echo "[S FILES]:" $(SFILES)
-	@echo "[C FILES]:" $(CFILES)
 	@echo "[LIBS]:" $(LIBS)
 	@echo "-----------------"
 	@echo
