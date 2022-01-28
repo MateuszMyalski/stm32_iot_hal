@@ -5,10 +5,23 @@
 
 #include "hal_common.h"
 
-#define GPIO_REG_SIZE 0x00400UL
+#define GPIO_REG_SIZE 0x00400U
+#define MAX_PIN_NUM_IN_PORT 16U
+
+static bool sanity_check(GPIO_TypeDef *GPIO_port, uint32_t GPIO_pin) {
+    if (!IS_GPIO_ALL_INSTANCE(GPIO_port)) {
+        return -1;
+    }
+
+    if (GPIO_pin >= MAX_PIN_NUM_IN_PORT) {
+        return -1;
+    }
+
+    return 0;
+}
 
 int hal_gpio_open(GPIO_TypeDef *GPIO_port) {
-    if (!IS_GPIO_ALL_INSTANCE(GPIO_port)) {
+    if (sanity_check(GPIO_port, 0) != 0) {
         return -1;
     }
 
@@ -22,19 +35,33 @@ int hal_gpio_open(GPIO_TypeDef *GPIO_port) {
     return 0;
 }
 
-int hal_gpio_close(GPIO_TypeDef *GPIO_port) { return 0; }
+int hal_gpio_close(GPIO_TypeDef *GPIO_port) {
+    if (sanity_check(GPIO_port, 0) != 0) {
+        return -1;
+    }
+    return 0;
+}
 
 int hal_gpio_ioctl(GPIO_TypeDef *GPIO_port, uint32_t GPIO_pin, gpio_ioctl_t gpio_ioctl) {
+    if (sanity_check(GPIO_port, GPIO_pin) != 0) {
+        return -1;
+    }
+
     switch (gpio_ioctl) {
-        case gpio_ioctl_digital_input:
-            return 1;
+        case gpio_ioctl_digital_input: {
+            int MODER_pos = GPIO_pin << 1;
+
+            CLEAR_BIT(GPIO_port->MODER, 2UL << MODER_pos);
+            CLEAR_BIT(GPIO_port->MODER, 1UL << MODER_pos);
             break;
+        }
         case gpio_ioctl_output: {
             int MODER_pos = GPIO_pin << 1;
 
             CLEAR_BIT(GPIO_port->MODER, 2UL << MODER_pos);
             SET_BIT(GPIO_port->MODER, 1UL << MODER_pos);
-        } break;
+            break;
+        }
         case gpio_ioctl_analog_input:
             return 1;
             break;
@@ -76,6 +103,10 @@ int hal_gpio_ioctl(GPIO_TypeDef *GPIO_port, uint32_t GPIO_pin, gpio_ioctl_t gpio
 }
 
 int hal_gpio_write(GPIO_TypeDef *GPIO_port, uint32_t GPIO_pin, bool value) {
+    if (sanity_check(GPIO_port, GPIO_pin) != 0) {
+        return -1;
+    }
+
     int BRR_pos = GPIO_pin + 16;
     int BSR_pos = GPIO_pin;
 
@@ -91,4 +122,8 @@ int hal_gpio_write(GPIO_TypeDef *GPIO_port, uint32_t GPIO_pin, bool value) {
 
     return 0;
 }
-bool hal_gpio_read(GPIO_TypeDef *GPIO_port, uint32_t GPIO_pin) { return 0; }
+bool hal_gpio_read(GPIO_TypeDef *GPIO_port, uint32_t GPIO_pin) {
+    // No sanity check
+
+    return READ_BIT(GPIO_port->IDR, 1UL << GPIO_pin);
+}
