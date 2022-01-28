@@ -13,6 +13,6 @@ CUBE_PROGRAMMER_PATH='/mnt/d/STM32CubeProgrammer/bin'
 GDB_SERVER="${ST_LINK_SERVER_PATH}/ST-LINK_gdbserver.exe"
 
 # Based on original config.txt from ST-LINK server
-SERVER_FLAGS="-e -f debug.log -p 3333 -r 15 -d -cp ${ST_LINK_SERVER_PATH_WIN_PATH}"
+SERVER_FLAGS="-e -f debug.log -p 3333 -r 15 -d -t -cp ${ST_LINK_SERVER_PATH_WIN_PATH}"
 
 ${GDB_SERVER} ${SERVER_FLAGS} &
