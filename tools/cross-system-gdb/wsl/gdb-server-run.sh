@@ -15,4 +15,8 @@ GDB_SERVER="${ST_LINK_SERVER_PATH}/ST-LINK_gdbserver.exe"
 # Based on original config.txt from ST-LINK server
 SERVER_FLAGS="-e -f debug.log -p 3333 -r 15 -d -t -cp ${ST_LINK_SERVER_PATH_WIN_PATH}"
 
+# Kill bg process
+pkill -9 gdb*
+pkill -9 ST-LINK*
+
 ${GDB_SERVER} ${SERVER_FLAGS} &
