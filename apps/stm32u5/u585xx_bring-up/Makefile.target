@@ -6,7 +6,6 @@ PROJECT_PATH := $(APPS_PATH)/stm32u5/u585xx_bring-up
 
 INCLUDES := -I$(PROJECT_PATH)/system/include \
 			-I$(PROJECT_PATH)/bsp/include \
-			-I$(PROJECT_PATH)/logger/include \
 			-I$(CORE_PATH)/CMSIS
 
 CFLAGS   := -c \
@@ -47,7 +46,8 @@ CFILES := main.c
 
 CFILES += ${SYSTEM_CFILES} ${BSP_CFILES}
 
-LIBS += $(OUT_LIB_PATH)/libhal.a
+LIBS += $(OUT_LIB_PATH)/libhal.a \
+		$(OUT_LIB_PATH)/liblog.a
 
 
 .PHONY: all
@@ -60,8 +60,21 @@ INCLUDES          += -I$(PROJECT_PATH)/hal/include
 
 LIBHAL_OBJS := $(patsubst %.c, $(OUT_OBJ_PATH)/%.o, $(LIBHAL_CFILES))
 
-$(OUT_LIB_PATH)/lib%.a: $(LIBHAL_OBJS)
-	@echo "[Archiving:" $@"]"
+$(OUT_LIB_PATH)/libhal.a: $(LIBHAL_OBJS)
+	@echo "[Archiving:" $(notdir $@)"]"
+	@mkdir -p $(dir $@)
+	@$(AR) rcu $@ $^
+
+# ------------------------------------
+
+# Log Library ------------------------
+LIBLOG_CFILES     := logger/tiny_printf.c
+INCLUDES          += -I$(PROJECT_PATH)/logger/include
+
+LIBLOG_OBJS := $(patsubst %.c, $(OUT_OBJ_PATH)/%.o, $(LIBLOG_CFILES))
+
+$(OUT_LIB_PATH)/liblog.a: $(LIBLOG_OBJS)
+	@echo "[Archiving:" $(notdir $@)"]"
 	@mkdir -p $(dir $@)
 	@$(AR) rcu $@ $^
 
@@ -73,23 +86,23 @@ OBJS := $(patsubst %.c, $(OUT_OBJ_PATH)/%.o, $(CFILES))
 OBJS += $(patsubst %.s, $(OUT_OBJ_PATH)/%.o, $(SFILES))
 
 $(TARGET).elf: $(OBJS) $(LIBS)
-	@echo "[Linking:" $@"]"
+	@echo "[Linking:" $(notdir $@)"]"
 	@$(CC) $^ $(LFLAGS) $(LIBS) -o $(OUT_PATH)/$@
 
 $(TARGET).hex: $(TARGET).elf
-	@echo "[Generating hex:" $@"]"
+	@echo "[Generating hex:" $(notdir $@)"]"
 	@$(OC) -O ihex $(OUT_PATH)/$(TARGET).elf $(OUT_PATH)/$(TARGET).hex
 	@$(OD) -D $(OUT_PATH)/$(TARGET).elf > $(OUT_PATH)/obj-dump-$(TARGET).lst
 	@$(OD) -t $(OUT_PATH)/$(TARGET).elf > $(OUT_PATH)/obj-dump-$(TARGET).map
 	@$(OD) -h $(OUT_PATH)/$(TARGET).elf > $(OUT_PATH)/obj-dump-sections-$(TARGET).map
 
 $(OUT_OBJ_PATH)/%.o: $(PROJECT_PATH)/%.c
-	@echo "[Compiling:" $@"]"
+	@echo "[Compiling:" $(notdir $@)"]"
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) $(INCLUDES) $< -o $@
 
 $(OUT_OBJ_PATH)/%.o: $(PROJECT_PATH)/%.s
-	@echo "[Syntezing:" $@"]"
+	@echo "[Syntezing:" $(notdir $@)"]"
 	@mkdir -p $(dir $@)
 	@$(CC) -x assembler-with-cpp $(INCLUDES) $(SFLAGS) $< -o $@
 

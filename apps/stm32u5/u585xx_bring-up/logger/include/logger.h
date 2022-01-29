@@ -1,5 +1,10 @@
 #ifndef LOGGER_HPP
 #define LOGGER_HPP
+#ifdef USE_TINY_PRINTF
+#include "tiny_printf.h"
+#else
+#include <stdio.h>
+#endif // USE_TINY_PRINTF
 
 #ifndef _LOGGER_PRINTF
 #define _LOGGER_PRINTF(...) printf(__VA_ARGS__)
