@@ -55,7 +55,8 @@ all : $(TARGET).hex
 
 
 # HAL Library ------------------------
-LIBHAL_CFILES     := hal/gpio.c
+LIBHAL_CFILES     := hal/gpio.c \
+					 hal/delay.c
 INCLUDES          += -I$(PROJECT_PATH)/hal/include
 
 LIBHAL_OBJS := $(patsubst %.c, $(OUT_OBJ_PATH)/%.o, $(LIBHAL_CFILES))
