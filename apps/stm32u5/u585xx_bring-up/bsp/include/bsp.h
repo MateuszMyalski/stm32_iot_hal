@@ -25,6 +25,16 @@
         }                                   \
     } while (0);
 
+/**
+ * @brief Initialize periphs on EVB
+ * @return 0 - on success, 1 - on error
+ */
+int bsp_init();
+
+/**
+ * @brief Initalize all GPIOS used for leds
+ * @return 0 - on success, 1 - on error
+ */
 int bsp_init_led();
 
 #endif

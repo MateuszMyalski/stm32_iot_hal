@@ -40,7 +40,8 @@ SYSTEM_CFILES := system/handlers.c \
 				system/syscalls.c \
 				system/system_stm32u5xx.c
 
-BSP_CFILES := bsp/led.c
+BSP_CFILES := bsp/led.c \
+              bsp/bsp_init.c
 
 CFILES := main.c
 
