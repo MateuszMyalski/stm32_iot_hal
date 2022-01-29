@@ -53,10 +53,8 @@ int putchar(signed int c) {
 }
 
 #ifdef USE_TINY_PRINTF
-void _putchar(char character) {
-    putchar(character);
-}
-#endif // USE_TINY_PRINTF
+void _putchar(char character) { putchar(character); }
+#endif  // USE_TINY_PRINTF
 
 int _write(int file, char *ptr, int len) {
     for (int data_idx = 0; data_idx < len; data_idx++) {
