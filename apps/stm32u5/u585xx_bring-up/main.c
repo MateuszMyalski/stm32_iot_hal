@@ -6,19 +6,8 @@
 #include "gpio.h"
 #include "logger.h"
 
-#ifdef USE_SEMIHOSTING
-extern void initialise_monitor_handles(void);
-#endif  // USE_SEMIHOSTING
-
 int main() {
-    SysTick_Config(SystemCoreClock / 1000);
-
-    Assert(bsp_init_led(), 0);
-
-#ifdef USE_SEMIHOSTING
-    initialise_monitor_handles();
-    printf("Semihosting turned on!\n");
-#endif  // USE_SEMIHOSTING
+    Assert(bsp_init(), 0);
 
     while (1) {
         LOG_INFO("Test!\n");
