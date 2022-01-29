@@ -8,41 +8,6 @@
 #endif
 
 extern int errno;
-char *__env[1] = {0};
-char **environ = __env;
-
-extern int __io_putchar(int ch) __attribute__((weak));
-extern int __io_getchar(void) __attribute__((weak));
-
-#ifdef USE_ITM_PRINT
-int putchar(signed int c) {
-    ITM_SendChar(c);
-    return 1;
-}
-#else
-int putchar(signed int c) {
-    // No implementation
-    return 1;
-}
-#endif // USE_ITM_PRINT
-
-int puts(const char *string) {
-    int i = 0;
-    while (string[i])  // standard c idiom for looping through a null-terminated string
-    {
-        if (putchar(string[i]) == EOF) {
-            return EOF;
-        }
-        i++;
-    }
-
-    // Add new line right after string null terminator
-    if (putchar('\n') == EOF) {
-        return EOF;
-    }
-
-    return 1;
-}
 
 int _kill(int pid, int sig) {
     errno = EINVAL;
@@ -79,9 +44,23 @@ caddr_t _sbrk(int incr) {
     return (caddr_t)prev_heap_end;
 }
 
+int putchar(signed int c) {
+#ifdef USE_ITM_WRITE
+    ITM_SendChar(c);
+#endif  // USE_ITM_WRITE
+
+    return c;
+}
+
+#ifdef USE_TINY_PRINTF
+void _putchar(char character) {
+    putchar(character);
+}
+#endif // USE_TINY_PRINTF
+
 int _write(int file, char *ptr, int len) {
     for (int data_idx = 0; data_idx < len; data_idx++) {
-        __io_putchar(*ptr++);
+        putchar(*ptr++);
     }
 
     return len;
@@ -89,7 +68,9 @@ int _write(int file, char *ptr, int len) {
 
 int _read(int file, char *ptr, int len) {
     for (int data_idx = 0; data_idx < len; data_idx++) {
-        *ptr++ = __io_getchar();
+#ifdef USE_ITM_READ
+        *ptr++ = ITM_ReceiveChar();
+#endif  // USE_ITM_READ
     }
 
     return len;
