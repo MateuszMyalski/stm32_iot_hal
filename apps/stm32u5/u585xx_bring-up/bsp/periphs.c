@@ -36,10 +36,10 @@ static int init_i2c2() {
     err = hal_gpio_ioctl(BSP_I2C2_SCL_PORT, BSP_I2C2_SCL_PIN, gpio_ioctl_alternate);
     ExitOnError(err);
 
-    err = hal_gpio_ioctl(BSP_I2C2_SCL_PORT, BSP_I2C2_SDA_PIN, gpio_ioctl_very_high_speed);
+    err = hal_gpio_ioctl(BSP_I2C2_SCL_PORT, BSP_I2C2_SCL_PIN, gpio_ioctl_very_high_speed);
     ExitOnError(err);
 
-    err = hal_gpio_ioctl(BSP_I2C2_SCL_PORT, BSP_I2C2_SDA_PIN, gpio_ioctl_af_4);
+    err = hal_gpio_ioctl(BSP_I2C2_SCL_PORT, BSP_I2C2_SCL_PIN, gpio_ioctl_af_4);
     ExitOnError(err);
 
     err = hal_i2c_open(I2C2, I2C_mode_master);
