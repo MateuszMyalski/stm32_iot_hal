@@ -3,9 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-
-#include "stm32u585xx.h"
-
+#include "hal_common.h"
 typedef enum {
     gpio_ioctl_digital_input,
     gpio_ioctl_output,
@@ -19,7 +17,23 @@ typedef enum {
     gpio_ioctl_very_high_speed,
     gpio_ioctl_no_pull,
     gpio_ioctl_pull_up,
-    gpio_ioctl_pull_down
+    gpio_ioctl_pull_down,
+    gpio_ioctl_af_0,
+    gpio_ioctl_af_1,
+    gpio_ioctl_af_2,
+    gpio_ioctl_af_3,
+    gpio_ioctl_af_4,
+    gpio_ioctl_af_5,
+    gpio_ioctl_af_6,
+    gpio_ioctl_af_7,
+    gpio_ioctl_af_8,
+    gpio_ioctl_af_9,
+    gpio_ioctl_af_10,
+    gpio_ioctl_af_11,
+    gpio_ioctl_af_12,
+    gpio_ioctl_af_13,
+    gpio_ioctl_af_14,
+    gpio_ioctl_af_15,
 } gpio_ioctl_t;
 
 /**
