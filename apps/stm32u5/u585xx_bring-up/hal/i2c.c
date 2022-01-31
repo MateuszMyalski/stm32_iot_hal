@@ -4,8 +4,8 @@ extern uint32_t SystemCoreClock;
 
 #define DNF_OFF 0x00UL
 
-static int i2c_set_TIMINGR(I2C_TypeDef *I2C, I2C_speed_t I2C_speed) {
-    if(SystemCoreClock != 16000000) {
+static int master_mode_set_TIMINGR(I2C_TypeDef *I2C, I2C_speed_t I2C_speed) {
+    if (SystemCoreClock != 16000000) {
         // Assume I2CCLK = 16MHz
         // TODO(Mateusz) add 8MHz version
         return 1;
@@ -60,7 +60,7 @@ static int i2c_master_mode_init(I2C_TypeDef *I2C) {
 
     /* Configure I2C_TIMINGR */
     int err;
-    err = i2c_set_TIMINGR(I2C, I2C_speed_100kHz);
+    err = master_mode_set_TIMINGR(I2C, I2C_speed_100kHz);
     if (0 != err) {
         return err;
     }
@@ -142,6 +142,43 @@ int hal_i2c_close(I2C_TypeDef *I2C) {
 
     // Software reset
     CLEAR_BIT(I2C->CR1, I2C_CR1_PE);
+
+    return 0;
+}
+
+static void write_gen_start(I2C_TypeDef *I2C) {
+    SET_BIT(I2C->CR2, I2C_CR2_START);
+    while (READ_BIT(I2C->CR2, I2C_CR2_START)) {
+        // Wait till start generation ends
+    }
+}
+
+int hal_i2c_write(I2C_TypeDef *I2C, uint16_t addr, const uint8_t *data, size_t len) {
+    if (len > 255) {
+        // TODO(Mateusz) Currently more than 255 bytes not supported
+        return 1;
+    }
+
+    /* Configure header */
+    if (addr > 0x00FFU) {
+        SET_BIT(I2C->CR2, I2C_CR2_ADD10);
+    } else {
+        CLEAR_BIT(I2C->CR2, I2C_CR2_ADD10);
+    }
+
+    MODIFY_REG(I2C->CR2, I2C_CR2_SADD_Msk, addr);
+    CLEAR_BIT(I2C->CR2, I2C_CR2_RD_WRN);  // Set write direction
+    write_gen_start(I2C);
+
+
+    return 0;
+}
+
+int hal_i2c_read(I2C_TypeDef *I2C, uint16_t addr, uint8_t *data, size_t len) {
+    if (len > 255) {
+        // TODO(Mateusz) Currently more than 255 bytes not supported
+        return 1;
+    }
 
     return 0;
 }
