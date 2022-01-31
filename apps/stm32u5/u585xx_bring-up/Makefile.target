@@ -41,7 +41,8 @@ SYSTEM_CFILES := system/handlers.c \
 				system/system_stm32u5xx.c
 
 BSP_CFILES := bsp/led.c \
-              bsp/bsp_init.c
+			  bsp/bsp_init.c \
+			  bsp/periphs.c
 
 CFILES := main.c
 
@@ -57,7 +58,8 @@ all : $(TARGET).hex
 
 # HAL Library ------------------------
 LIBHAL_CFILES     := hal/gpio.c \
-					 hal/delay.c
+					 hal/delay.c \
+					 hal/i2c.c
 INCLUDES          += -I$(PROJECT_PATH)/hal/include
 
 LIBHAL_OBJS := $(patsubst %.c, $(OUT_OBJ_PATH)/%.o, $(LIBHAL_CFILES))

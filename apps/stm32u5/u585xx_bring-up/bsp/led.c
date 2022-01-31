@@ -2,7 +2,7 @@
 #include "bsp.h"
 #include "gpio.h"
 
-int bsp_init_led() {
+int bsp_init_led(void) {
     int err = 0;
 
     err = hal_gpio_open(BSP_GREEN_LED_PORT);

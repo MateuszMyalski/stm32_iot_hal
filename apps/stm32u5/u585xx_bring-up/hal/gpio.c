@@ -1,8 +1,5 @@
-#include <stdbool.h>
-
 #include "gpio.h"
-#include "stm32u5xx.h"
-
+#include <stdbool.h>
 #include "hal_common.h"
 
 #define GPIO_REG_SIZE 0x00400U
@@ -89,32 +86,84 @@ int hal_gpio_ioctl(GPIO_TypeDef *GPIO_port, uint32_t GPIO_pin, gpio_ioctl_t gpio
             break;
         }
         case gpio_ioctl_push_pull:
-            return 1;
+            CLEAR_BIT(GPIO_port->OTYPER, GPIO_pin);
             break;
         case gpio_ioctl_open_drain:
-            return 1;
+            SET_BIT(GPIO_port->OTYPER, GPIO_pin);
             break;
-        case gpio_ioctl_low_speed:
-            return 1;
+        case gpio_ioctl_low_speed: {
+            int OSPEEDR_pos = GPIO_pin << 1;
+
+            CLEAR_BIT(GPIO_port->OSPEEDR, 2UL << OSPEEDR_pos);
+            CLEAR_BIT(GPIO_port->OSPEEDR, 1UL << OSPEEDR_pos);
             break;
-        case gpio_ioctl_medium_speed:
-            return 1;
+        }
+        case gpio_ioctl_medium_speed: {
+            int OSPEEDR_pos = GPIO_pin << 1;
+
+            CLEAR_BIT(GPIO_port->OSPEEDR, 2UL << OSPEEDR_pos);
+            SET_BIT(GPIO_port->OSPEEDR, 1UL << OSPEEDR_pos);
             break;
-        case gpio_ioctl_high_speed:
-            return 1;
+        }
+        case gpio_ioctl_high_speed: {
+            int OSPEEDR_pos = GPIO_pin << 1;
+
+            SET_BIT(GPIO_port->OSPEEDR, 2UL << OSPEEDR_pos);
+            CLEAR_BIT(GPIO_port->OSPEEDR, 1UL << OSPEEDR_pos);
             break;
-        case gpio_ioctl_very_high_speed:
-            return 1;
+        }
+        case gpio_ioctl_very_high_speed: {
+            int OSPEEDR_pos = GPIO_pin << 1;
+
+            SET_BIT(GPIO_port->OSPEEDR, 2UL << OSPEEDR_pos);
+            SET_BIT(GPIO_port->OSPEEDR, 1UL << OSPEEDR_pos);
             break;
-        case gpio_ioctl_no_pull:
-            return 1;
+        }
+        case gpio_ioctl_no_pull: {
+            int PUPDR_pos = GPIO_pin << 1;
+
+            CLEAR_BIT(GPIO_port->PUPDR, 2UL << PUPDR_pos);
+            CLEAR_BIT(GPIO_port->PUPDR, 1UL << PUPDR_pos);
             break;
-        case gpio_ioctl_pull_up:
-            return 1;
+        }
+        case gpio_ioctl_pull_up: {
+            int PUPDR_pos = GPIO_pin << 1;
+
+            CLEAR_BIT(GPIO_port->PUPDR, 2UL << PUPDR_pos);
+            SET_BIT(GPIO_port->PUPDR, 1UL << PUPDR_pos);
             break;
-        case gpio_ioctl_pull_down:
-            return 1;
+        }
+        case gpio_ioctl_pull_down: {
+            int PUPDR_pos = GPIO_pin << 1;
+
+            SET_BIT(GPIO_port->PUPDR, 2UL << PUPDR_pos);
+            CLEAR_BIT(GPIO_port->PUPDR, 1UL << PUPDR_pos);
             break;
+        }
+        case gpio_ioctl_af_0:
+        case gpio_ioctl_af_1:
+        case gpio_ioctl_af_2:
+        case gpio_ioctl_af_3:
+        case gpio_ioctl_af_4:
+        case gpio_ioctl_af_5:
+        case gpio_ioctl_af_6:
+        case gpio_ioctl_af_7:
+        case gpio_ioctl_af_8:
+        case gpio_ioctl_af_9:
+        case gpio_ioctl_af_10:
+        case gpio_ioctl_af_11:
+        case gpio_ioctl_af_12:
+        case gpio_ioctl_af_13:
+        case gpio_ioctl_af_14:
+        case gpio_ioctl_af_15: {
+            int AFR_idx = GPIO_pin < 7 ? 0 : 1;
+            int AFR_pos = (GPIO_pin << 2) % 32;
+            uint32_t AFR_msk = 0x0FUL << AFR_pos;
+            int AFSELy = gpio_ioctl - gpio_ioctl_af_0;  // Translate offseted enum value
+
+            MODIFY_REG(GPIO_port->AFR[AFR_idx], AFR_msk, AFSELy << AFR_pos);
+            break;
+        }
 
         default:
             return 1;

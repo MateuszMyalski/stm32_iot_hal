@@ -2,13 +2,19 @@
 #define BSP_HPP
 
 #define BSP_RED_LED_PORT GPIOH
-#define BSP_RED_LED_PIN 6
+#define BSP_RED_LED_PIN 6U
 
 #define BSP_GREEN_LED_PORT GPIOH
-#define BSP_GREEN_LED_PIN 7
+#define BSP_GREEN_LED_PIN 7U
 
 #define BSP_USER_BUTTON_PORT GPIOC
-#define BSP_USER_BUTTON_PIN 13
+#define BSP_USER_BUTTON_PIN 13U
+
+#define BSP_I2C2_SDA_PORT GPIOH
+#define BSP_I2C2_SDA_PIN 5U
+
+#define BSP_I2C2_SCL_PORT GPIOH
+#define BSP_I2C2_SCL_PIN 4U
 
 #define ExitOnError(x)  \
     do {                \
@@ -29,12 +35,18 @@
  * @brief Initialize periphs on EVB
  * @return 0 - on success, 1 - on error
  */
-int bsp_init();
+int bsp_init(void);
 
 /**
  * @brief Initalize all GPIOS used for leds
  * @return 0 - on success, 1 - on error
  */
-int bsp_init_led();
+int bsp_init_led(void);
+
+/**
+ * @brief Initalize all peripherials
+ * @return 0 - on success, 1 - on error
+ */
+int bsp_init_periphs(void);
 
 #endif
