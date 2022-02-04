@@ -6,52 +6,45 @@ extern volatile uint32_t SysTick_msTicks;
 
 #define DNF_OFF 0x00UL
 
+// Based on table 539 from reference note
+static uint32_t TIMINGR_8Mhz_lut[4][5] = {
+    {1U, 0xC7U, 0xC3U, 0x2U, 0x4U},  // I2C 10kHz
+    {1U, 0x13U, 0xFU, 0x2U, 0x4U},   // I2C 100kHz
+    {0U, 0x9U, 0x3U, 0x1U, 0x3U},    // I2C 400kHz
+    {0U, 0x6U, 0x3U, 0x0U, 0x1U}     // I2C 1MHz
+};
+
+// Based on table 540 from reference note
+static uint32_t TIMINGR_16Mhz_lut[4][5] = {
+    {3U, 0xC7U, 0xC3U, 0x2U, 0x4U},  // I2C 10kHz
+    {3U, 0x13U, 0xFU, 0x2U, 0x4U},   // I2C 100kHz
+    {1U, 0x9U, 0x3U, 0x2U, 0x3U},    // I2C 400kHz
+    {0U, 0x4U, 0x2U, 0x0U, 0x2U}     // I2C 1MHz
+};
+
 static int master_mode_set_TIMINGR(I2C_TypeDef *I2C, I2C_speed_t I2C_speed) {
-    if (SystemCoreClock != 16000000) {
-        // Assume I2CCLK = 16MHz
-        // TODO(Mateusz) add 8MHz version
+    if ((SystemCoreClock != 16000000) && (SystemCoreClock != 8000000)) {
         return 1;
     }
 
-    // Based on table 540 from reference note
-    switch (I2C_speed) {
-        case I2C_speed_10kHz:
-            MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_PRESC_Msk, 3U << I2C_TIMINGR_PRESC_Pos);
-            MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SCLL_Msk, 0xC7U << I2C_TIMINGR_SCLL_Pos);
-            MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SCLH_Msk, 0xC3U << I2C_TIMINGR_SCLH_Pos);
-            MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SDADEL_Msk, 0x2U << I2C_TIMINGR_SDADEL_Pos);
-            MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SCLDEL_Msk, 0x4U << I2C_TIMINGR_SCLDEL_Pos);
-            break;
-        case I2C_speed_100kHz:
-            MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_PRESC_Msk, 3U << I2C_TIMINGR_PRESC_Pos);
-            MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SCLL_Msk, 0x13U << I2C_TIMINGR_SCLL_Pos);
-            MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SCLH_Msk, 0xFU << I2C_TIMINGR_SCLH_Pos);
-            MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SDADEL_Msk, 0x2U << I2C_TIMINGR_SDADEL_Pos);
-            MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SCLDEL_Msk, 0x4U << I2C_TIMINGR_SCLDEL_Pos);
-            break;
-        case I2C_speed_400kHz:
-            MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_PRESC_Msk, 1U << I2C_TIMINGR_PRESC_Pos);
-            MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SCLL_Msk, 0x9U << I2C_TIMINGR_SCLL_Pos);
-            MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SCLH_Msk, 0x3U << I2C_TIMINGR_SCLH_Pos);
-            MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SDADEL_Msk, 0x2U << I2C_TIMINGR_SDADEL_Pos);
-            MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SCLDEL_Msk, 0x3U << I2C_TIMINGR_SCLDEL_Pos);
-            break;
-        case I2C_speed_1MHz:
-            MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_PRESC_Msk, 0U << I2C_TIMINGR_PRESC_Pos);
-            MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SCLL_Msk, 0x4U << I2C_TIMINGR_SCLL_Pos);
-            MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SCLH_Msk, 0x2U << I2C_TIMINGR_SCLH_Pos);
-            MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SDADEL_Msk, 0x0U << I2C_TIMINGR_SDADEL_Pos);
-            MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SCLDEL_Msk, 0x2U << I2C_TIMINGR_SCLDEL_Pos);
-            break;
-        default:
-            return -1;
-            break;
+    if (16000000 == SystemCoreClock) {
+        MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_PRESC_Msk, TIMINGR_16Mhz_lut[I2C_speed][0] << I2C_TIMINGR_PRESC_Pos);
+        MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SCLL_Msk, TIMINGR_16Mhz_lut[I2C_speed][1] << I2C_TIMINGR_SCLL_Pos);
+        MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SCLH_Msk, TIMINGR_16Mhz_lut[I2C_speed][2] << I2C_TIMINGR_SCLH_Pos);
+        MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SDADEL_Msk, TIMINGR_16Mhz_lut[I2C_speed][3] << I2C_TIMINGR_SDADEL_Pos);
+        MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SCLDEL_Msk, TIMINGR_16Mhz_lut[I2C_speed][4] << I2C_TIMINGR_SCLDEL_Pos);
+    } else {
+        MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_PRESC_Msk, TIMINGR_8Mhz_lut[I2C_speed][0] << I2C_TIMINGR_PRESC_Pos);
+        MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SCLL_Msk, TIMINGR_8Mhz_lut[I2C_speed][1] << I2C_TIMINGR_SCLL_Pos);
+        MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SCLH_Msk, TIMINGR_8Mhz_lut[I2C_speed][2] << I2C_TIMINGR_SCLH_Pos);
+        MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SDADEL_Msk, TIMINGR_8Mhz_lut[I2C_speed][3] << I2C_TIMINGR_SDADEL_Pos);
+        MODIFY_REG(I2C->TIMINGR, I2C_TIMINGR_SCLDEL_Msk, TIMINGR_8Mhz_lut[I2C_speed][4] << I2C_TIMINGR_SCLDEL_Pos);
     }
 
     return 0;
 }
 
-static int i2c_master_mode_init(I2C_TypeDef *I2C) {
+static int i2c_master_mode_init(I2C_TypeDef *I2C, I2C_speed_t I2C_speed) {
     /* Clear PE bit in Initialize I2C_CR1 */
     CLEAR_BIT(I2C->CR1, I2C_CR1_PE);
 
@@ -62,7 +55,7 @@ static int i2c_master_mode_init(I2C_TypeDef *I2C) {
 
     /* Configure I2C_TIMINGR */
     int err;
-    err = master_mode_set_TIMINGR(I2C, I2C_speed_100kHz);
+    err = master_mode_set_TIMINGR(I2C, I2C_speed);
     if (0 != err) {
         return err;
     }
@@ -76,7 +69,7 @@ static int i2c_master_mode_init(I2C_TypeDef *I2C) {
     return 0;
 }
 
-int hal_i2c_open(I2C_TypeDef *I2C, I2C_mode_t I2C_mode) {
+int hal_i2c_open(I2C_TypeDef *I2C, I2C_mode_t I2C_mode, I2C_speed_t I2C_speed) {
     if (!IS_I2C_ALL_INSTANCE(I2C)) {
         return -1;
     }
@@ -105,7 +98,7 @@ int hal_i2c_open(I2C_TypeDef *I2C, I2C_mode_t I2C_mode) {
             return 1;
             break;
         case I2C_mode_master:
-            return i2c_master_mode_init(I2C);
+            return i2c_master_mode_init(I2C, I2C_speed);
             break;
         case I2C_mode_SMBUS_master:
             return 1;
@@ -190,39 +183,48 @@ static void i2c_read_byte(I2C_TypeDef *I2C, uint8_t *byte) {
     *byte = I2C->RXDR & I2C_RXDR_RXDATA_Msk;
 }
 
-int hal_i2c_master_write(I2C_TypeDef *I2C, uint16_t dev_addr, const uint8_t *data, size_t len) {
+static bool i2c_is_nack(I2C_TypeDef *I2C) { return READ_BIT(I2C->ISR, I2C_ICR_NACKCF); }
+
+int hal_i2c_master_write(I2C_TypeDef *I2C, uint16_t dev_addr, uint8_t reg_addr, const uint8_t *data, size_t len) {
     if ((len > 255) || (len <= 0)) {
         // TODO(Mateusz) Currently more than 255 bytes not supported
         return 1;
     }
 
-    i2c_set_nbytes_devaddr(I2C, len, dev_addr);
-
+    i2c_set_nbytes_devaddr(I2C, len + 1, dev_addr);
     i2c_set_read_dir(I2C, false);
-
     i2c_start(I2C);
 
+    if (i2c_is_nack(I2C)) {
+        return -1;
+    }
+
+    i2c_send_byte(I2C, reg_addr);
     for (int i = 0; i < len; i++) {
         i2c_send_byte(I2C, data[i]);
     }
 
-    i2c_stop(I2C);
+    // Stop should be automatically generated after
+    // received NACK
 
     return 0;
 }
 
-int hal_i2c_master_read(I2C_TypeDef *I2C, uint16_t dev_addr, uint8_t mem_addr, uint8_t *data, size_t len) {
-    if (len > 255) {
+int hal_i2c_master_read(I2C_TypeDef *I2C, uint16_t dev_addr, uint8_t reg_addr, uint8_t *data, size_t len) {
+    if ((len > 255) || (len <= 0)) {
         // TODO(Mateusz) Currently more than 255 bytes not supported
         return 1;
     }
 
     /* Call the device and setup read register */
     i2c_set_nbytes_devaddr(I2C, 1, dev_addr);
-    // SET_BIT(I2C->CR2, I2C_CR2_AUTOEND);
     i2c_set_read_dir(I2C, false);
     i2c_start(I2C);
-    i2c_send_byte(I2C, mem_addr);
+    i2c_send_byte(I2C, reg_addr);
+
+    if (i2c_is_nack(I2C)) {
+        return -1;
+    }
 
     /* Read content from device's register */
     i2c_set_nbytes_devaddr(I2C, len, dev_addr);
@@ -232,7 +234,8 @@ int hal_i2c_master_read(I2C_TypeDef *I2C, uint16_t dev_addr, uint8_t mem_addr, u
         i2c_read_byte(I2C, &data[i]);
     }
 
-    i2c_stop(I2C);
+    // Stop should be automatically generated after
+    // received NACK
 
     return 0;
 }

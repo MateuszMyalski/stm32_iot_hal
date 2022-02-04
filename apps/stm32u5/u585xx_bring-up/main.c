@@ -7,17 +7,53 @@
 #include "logger.h"
 #include "i2c.h"
 
+void error_blink() {
+    int blink_rate = 300;
+    bool led_status = true;
+    for (int i = 0; i < blink_rate; i += 50) {
+        led_status = !led_status;
+        hal_gpio_write(BSP_RED_LED_PORT, BSP_RED_LED_PIN, led_status);
+        delay_ms(blink_rate - i);
+    }
+}
+
+void hts221_simple_test(void) {
+    // This Function is only for I2C bring-up testing
+    // remove it in futre
+    uint8_t hts221_dev_addr         = 0xBE;
+    uint8_t hts221_who_am_i_reg     = 0x0F;
+    uint8_t hts221_ctrl_reg1_reg    = 0x20;
+
+    uint8_t hts221_rx = 0;
+    uint8_t hts221_tx = 0;
+
+
+    hal_i2c_master_read(I2C2, hts221_dev_addr, hts221_who_am_i_reg, &hts221_rx, 1);
+    if(hts221_rx != 0xBC) {
+        error_blink();
+        return;
+    }
+
+    hal_i2c_master_read(I2C2, hts221_dev_addr, hts221_ctrl_reg1_reg, &hts221_rx, 1);
+    // Can be on after warm reset
+    if((hts221_rx != 0x00) && (hts221_rx != 0x80)) {
+        error_blink();
+        return;
+    }
+
+    hts221_tx = hts221_rx | 0b10000000;  // Power on
+    hal_i2c_master_write(I2C2, hts221_dev_addr, hts221_ctrl_reg1_reg, &hts221_tx, 1);
+
+    hal_i2c_master_read(I2C2, hts221_dev_addr, hts221_ctrl_reg1_reg, &hts221_rx, 1);
+    if(hts221_rx != hts221_tx) {
+        error_blink();
+        return;
+    }
+}
+
 int main() {
     Assert(bsp_init(), 0);
-    uint8_t i2c_rx[2];
-    // hal_i2c_master_read(I2C2, 0xBE, 0x20, i2c_rx, 2);
-    hal_i2c_master_read(I2C2, 0xBE, 0x0F, i2c_rx, 1);
-
-    // uint8_t i2c_tx[2] = {0x20, 0x84};
-    // hal_i2c_master_write(I2C1, 0xBE, i2c_tx, 2);
-
-    uint16_t rx_data = i2c_rx[1] << 8 | i2c_rx[0];
-    LOG_INFO("Rxed value: %#x\r\n", rx_data);
+    hts221_simple_test();
 
     while (1) {
         bool r_value = !hal_gpio_read(BSP_USER_BUTTON_PORT, BSP_USER_BUTTON_PIN);
