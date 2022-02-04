@@ -12,7 +12,7 @@ int hal_i2c_close(I2C_TypeDef *I2C);
 
 int hal_i2c_ioctl(I2C_TypeDef *I2C);
 
-int hal_i2c_read(I2C_TypeDef *I2C, uint16_t addr, uint8_t *data, size_t len);
-int hal_i2c_write(I2C_TypeDef *I2C, uint16_t addr, const uint8_t *data, size_t len);
+int hal_i2c_master_read(I2C_TypeDef *I2C, uint16_t dev_addr, uint8_t mem_addr, uint8_t *data, size_t len);
+int hal_i2c_master_write(I2C_TypeDef *I2C, uint16_t dev_addr, const uint8_t *data, size_t len);
 
 #endif

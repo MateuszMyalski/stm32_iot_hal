@@ -1,6 +1,8 @@
 #include "i2c.h"
+#include <stdbool.h>
 
 extern uint32_t SystemCoreClock;
+extern volatile uint32_t SysTick_msTicks;
 
 #define DNF_OFF 0x00UL
 
@@ -146,39 +148,91 @@ int hal_i2c_close(I2C_TypeDef *I2C) {
     return 0;
 }
 
-static void write_gen_start(I2C_TypeDef *I2C) {
+static void i2c_start(I2C_TypeDef *I2C) {
     SET_BIT(I2C->CR2, I2C_CR2_START);
     while (READ_BIT(I2C->CR2, I2C_CR2_START)) {
         // Wait till start generation ends
     }
 }
 
-int hal_i2c_write(I2C_TypeDef *I2C, uint16_t addr, const uint8_t *data, size_t len) {
-    if (len > 255) {
-        // TODO(Mateusz) Currently more than 255 bytes not supported
-        return 1;
-    }
+static void i2c_stop(I2C_TypeDef *I2C) { SET_BIT(I2C->CR2, I2C_CR2_STOP); }
 
-    /* Configure header */
-    if (addr > 0x00FFU) {
+static void i2c_send_byte(I2C_TypeDef *I2C, uint8_t byte) {
+    while (!READ_BIT(I2C->ISR, I2C_ISR_TXIS)) {
+        // Wait till the buffer is empty
+    }
+    MODIFY_REG(I2C->TXDR, I2C_TXDR_TXDATA_Msk, byte << I2C_TXDR_TXDATA_Pos);
+}
+
+static void i2c_set_nbytes_devaddr(I2C_TypeDef *I2C, size_t len, uint16_t dev_addr) {
+    if (dev_addr > 0x00FFU) {
         SET_BIT(I2C->CR2, I2C_CR2_ADD10);
     } else {
         CLEAR_BIT(I2C->CR2, I2C_CR2_ADD10);
     }
 
-    MODIFY_REG(I2C->CR2, I2C_CR2_SADD_Msk, addr);
-    CLEAR_BIT(I2C->CR2, I2C_CR2_RD_WRN);  // Set write direction
-    write_gen_start(I2C);
+    MODIFY_REG(I2C->CR2, I2C_CR2_SADD_Msk, dev_addr);
+    MODIFY_REG(I2C->CR2, I2C_CR2_NBYTES_Msk, len << I2C_CR2_NBYTES_Pos);
+}
 
+static void i2c_set_read_dir(I2C_TypeDef *I2C, bool set_read) {
+    if (set_read) {
+        SET_BIT(I2C->CR2, I2C_CR2_RD_WRN);
+    } else {
+        CLEAR_BIT(I2C->CR2, I2C_CR2_RD_WRN);
+    }
+}
+
+static void i2c_read_byte(I2C_TypeDef *I2C, uint8_t *byte) {
+    while (!READ_BIT(I2C->ISR, I2C_ISR_RXNE)) {
+        // Wait till data copied to buffer
+    }
+    *byte = I2C->RXDR & I2C_RXDR_RXDATA_Msk;
+}
+
+int hal_i2c_master_write(I2C_TypeDef *I2C, uint16_t dev_addr, const uint8_t *data, size_t len) {
+    if ((len > 255) || (len <= 0)) {
+        // TODO(Mateusz) Currently more than 255 bytes not supported
+        return 1;
+    }
+
+    i2c_set_nbytes_devaddr(I2C, len, dev_addr);
+
+    i2c_set_read_dir(I2C, false);
+
+    i2c_start(I2C);
+
+    for (int i = 0; i < len; i++) {
+        i2c_send_byte(I2C, data[i]);
+    }
+
+    i2c_stop(I2C);
 
     return 0;
 }
 
-int hal_i2c_read(I2C_TypeDef *I2C, uint16_t addr, uint8_t *data, size_t len) {
+int hal_i2c_master_read(I2C_TypeDef *I2C, uint16_t dev_addr, uint8_t mem_addr, uint8_t *data, size_t len) {
     if (len > 255) {
         // TODO(Mateusz) Currently more than 255 bytes not supported
         return 1;
     }
+
+    /* Call the device and setup read register */
+    i2c_set_nbytes_devaddr(I2C, 1, dev_addr);
+    // SET_BIT(I2C->CR2, I2C_CR2_AUTOEND);
+    i2c_set_read_dir(I2C, false);
+    i2c_start(I2C);
+    i2c_send_byte(I2C, mem_addr);
+
+    /* Read content from device's register */
+    i2c_set_nbytes_devaddr(I2C, len, dev_addr);
+    i2c_set_read_dir(I2C, true);
+    i2c_start(I2C);
+    for (int i = 0; i < len; i++) {
+        i2c_read_byte(I2C, &data[i]);
+    }
+
+    i2c_stop(I2C);
 
     return 0;
 }
