@@ -1,8 +1,8 @@
 #ifndef GPIO_H
 #define GPIO_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include "hal_common.h"
 typedef enum {
     gpio_ioctl_digital_input,
