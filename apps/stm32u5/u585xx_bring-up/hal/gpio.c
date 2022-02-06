@@ -86,10 +86,10 @@ int hal_gpio_ioctl(GPIO_TypeDef *GPIO_port, uint32_t GPIO_pin, gpio_ioctl_t gpio
             break;
         }
         case gpio_ioctl_push_pull:
-            CLEAR_BIT(GPIO_port->OTYPER, GPIO_pin);
+            CLEAR_BIT(GPIO_port->OTYPER, 1UL << GPIO_pin);
             break;
         case gpio_ioctl_open_drain:
-            SET_BIT(GPIO_port->OTYPER, GPIO_pin);
+            SET_BIT(GPIO_port->OTYPER, 1UL << GPIO_pin);
             break;
         case gpio_ioctl_low_speed: {
             int OSPEEDR_pos = GPIO_pin << 1;

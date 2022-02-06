@@ -16,6 +16,12 @@
 #define BSP_I2C2_SCL_PORT GPIOH
 #define BSP_I2C2_SCL_PIN 4U
 
+#define BSP_I2C1_SDA_PORT GPIOB
+#define BSP_I2C1_SDA_PIN 9U
+
+#define BSP_I2C1_SCL_PORT GPIOB
+#define BSP_I2C1_SCL_PIN 8U
+
 #define ExitOnError(x)  \
     do {                \
         if (0 != (x)) { \
