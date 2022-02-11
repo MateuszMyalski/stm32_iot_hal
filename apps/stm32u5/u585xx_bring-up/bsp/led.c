@@ -1,6 +1,6 @@
 #include <stdbool.h>
 #include "bsp.h"
-#include "gpio.h"
+#include "hal_gpio.h"
 
 int bsp_init_led(void) {
     int err = 0;

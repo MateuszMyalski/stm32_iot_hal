@@ -3,8 +3,7 @@
 #include "stm32u585xx.h"
 #include "stm32u5xx.h"
 
-#ifdef USE_SEMIH
-OSTING
+#ifdef USE_SEMIHOSTING
 extern void initialise_monitor_handles(void);
 #endif  // USE_SEMIHOSTING
 
