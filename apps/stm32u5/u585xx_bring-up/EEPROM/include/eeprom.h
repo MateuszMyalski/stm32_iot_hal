@@ -24,6 +24,7 @@ typedef struct {
 } eeprom_t;
 
 int eeprom_M4256_D_init(eeprom_t *eeprom, tx_data_cb_t tx_data_cb, rx_data_cb_t rx_data_cb);
+
 int eeprom_read_partition(const eeprom_t *eeprom, uint8_t *buffer, const partition_entry_t *part);
 int eeprom_write_partition(const eeprom_t *eeprom, const uint8_t *buffer, const partition_entry_t *part);
 int eeprom_write_and_check_partition(const eeprom_t *eeprom, const uint8_t *buffer, const partition_entry_t *part);
