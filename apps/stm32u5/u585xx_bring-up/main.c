@@ -3,9 +3,9 @@
 
 #include "bsp.h"
 #include "delay.h"
-#include "gpio.h"
+#include "hal_gpio.h"
+#include "hal_i2c.h"
 #include "logger.h"
-#include "i2c.h"
 
 void error_blink() {
     int blink_rate = 300;
@@ -20,23 +20,22 @@ void error_blink() {
 void hts221_simple_test(void) {
     // This Function is only for I2C bring-up testing
     // remove it in futre
-    uint8_t hts221_dev_addr         = 0xBE;
-    uint8_t hts221_who_am_i_reg     = 0x0F;
-    uint8_t hts221_ctrl_reg1_reg    = 0x20;
+    uint8_t hts221_dev_addr = 0xBE;
+    uint8_t hts221_who_am_i_reg = 0x0F;
+    uint8_t hts221_ctrl_reg1_reg = 0x20;
 
     uint8_t hts221_rx = 0;
     uint8_t hts221_tx = 0;
 
-
     hal_i2c_master_read(I2C2, hts221_dev_addr, hts221_who_am_i_reg, &hts221_rx, 1);
-    if(hts221_rx != 0xBC) {
+    if (hts221_rx != 0xBC) {
         error_blink();
         return;
     }
 
     hal_i2c_master_read(I2C2, hts221_dev_addr, hts221_ctrl_reg1_reg, &hts221_rx, 1);
     // Can be on after warm reset
-    if((hts221_rx != 0x00) && (hts221_rx != 0x80)) {
+    if ((hts221_rx != 0x00) && (hts221_rx != 0x80)) {
         error_blink();
         return;
     }
@@ -45,7 +44,7 @@ void hts221_simple_test(void) {
     hal_i2c_master_write(I2C2, hts221_dev_addr, hts221_ctrl_reg1_reg, &hts221_tx, 1);
 
     hal_i2c_master_read(I2C2, hts221_dev_addr, hts221_ctrl_reg1_reg, &hts221_rx, 1);
-    if(hts221_rx != hts221_tx) {
+    if (hts221_rx != hts221_tx) {
         error_blink();
         return;
     }
@@ -53,7 +52,42 @@ void hts221_simple_test(void) {
 
 int main() {
     Assert(bsp_init(), 0);
-    hts221_simple_test();
+    // hts221_simple_test();
+
+    uint8_t rx_data[128] = {};
+    uint8_t rx_data_bis[1] = {};
+    const uint8_t tx_data[] = {0xDE, 0xAD, 0xBE, 0xEF};
+
+    int ret = hal_i2c_memory_write(I2C2, 0xAD, 0x00000, &tx_data, sizeof(tx_data));
+    if (ret) {
+        while (1)
+            ;
+    }
+    delay_ms(50);
+
+    uint8_t tmp = 0xAA;
+    ret = hal_i2c_memory_write(I2C2, 0xAD, 64, &tmp, 1);
+    delay_ms(50);
+    tmp = 0xAD;
+    ret = hal_i2c_memory_write(I2C2, 0xAD, 66, &tmp, 1);
+    if (ret) {
+        while (1)
+            ;
+    }
+    delay_ms(50);
+
+    int ret_rx = hal_i2c_memory_read(I2C2, 0xAD, 0x00000, rx_data, sizeof(rx_data));
+    if (ret_rx) {
+        while (1)
+            ;
+    }
+    if (rx_data[0] == 0xCA) {
+        while (1)
+            ;
+    }
+
+
+    // hal_i2c_memory_read(I2C2, 0xAD, 0x00000, rx_data_bis, sizeof(rx_data));
 
     while (1) {
         bool r_value = !hal_gpio_read(BSP_USER_BUTTON_PORT, BSP_USER_BUTTON_PIN);

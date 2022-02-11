@@ -1,6 +1,6 @@
 #include "bsp.h"
-#include "gpio.h"
-#include "i2c.h"
+#include "hal_gpio.h"
+#include "hal_i2c.h"
 
 static int init_i2c(I2C_TypeDef* I2C, GPIO_TypeDef* I2C_SDA_port, uint32_t I2C_SDA_pin, GPIO_TypeDef* I2C_SCL_port,
                 uint32_t I2C_SCL_pin) {
