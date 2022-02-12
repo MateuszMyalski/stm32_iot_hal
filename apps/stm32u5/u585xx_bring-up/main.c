@@ -19,7 +19,7 @@ void error_blink() {
 
 void hts221_simple_test(void) {
     // This Function is only for I2C bring-up testing
-    // remove it in futre
+    // remove it in future
     uint8_t hts221_dev_addr = 0xBE;
     uint8_t hts221_who_am_i_reg = 0x0F;
     uint8_t hts221_ctrl_reg1_reg = 0x20;
@@ -52,42 +52,7 @@ void hts221_simple_test(void) {
 
 int main() {
     Assert(bsp_init(), 0);
-    // hts221_simple_test();
-
-    uint8_t rx_data[128] = {};
-    uint8_t rx_data_bis[1] = {};
-    const uint8_t tx_data[] = {0xDE, 0xAD, 0xBE, 0xEF};
-
-    int ret = hal_i2c_memory_write(I2C2, 0xAD, 0x00000, &tx_data, sizeof(tx_data));
-    if (ret) {
-        while (1)
-            ;
-    }
-    delay_ms(50);
-
-    uint8_t tmp = 0xAA;
-    ret = hal_i2c_memory_write(I2C2, 0xAD, 64, &tmp, 1);
-    delay_ms(50);
-    tmp = 0xAD;
-    ret = hal_i2c_memory_write(I2C2, 0xAD, 66, &tmp, 1);
-    if (ret) {
-        while (1)
-            ;
-    }
-    delay_ms(50);
-
-    int ret_rx = hal_i2c_memory_read(I2C2, 0xAD, 0x00000, rx_data, sizeof(rx_data));
-    if (ret_rx) {
-        while (1)
-            ;
-    }
-    if (rx_data[0] == 0xCA) {
-        while (1)
-            ;
-    }
-
-
-    // hal_i2c_memory_read(I2C2, 0xAD, 0x00000, rx_data_bis, sizeof(rx_data));
+    hts221_simple_test();
 
     while (1) {
         bool r_value = !hal_gpio_read(BSP_USER_BUTTON_PORT, BSP_USER_BUTTON_PIN);

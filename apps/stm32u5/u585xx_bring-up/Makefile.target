@@ -50,9 +50,7 @@ CFILES := main.c
 CFILES += ${SYSTEM_CFILES} ${BSP_CFILES}
 
 LIBS += $(OUT_LIB_PATH)/libhal.a \
-		$(OUT_LIB_PATH)/liblog.a \
-		$(OUT_LIB_PATH)/libeeprom.a \
-		$(OUT_LIB_PATH)/libmem_part.a
+		$(OUT_LIB_PATH)/liblog.a
 
 
 .PHONY: all
@@ -86,32 +84,6 @@ INCLUDES          += -I$(PROJECT_PATH)/logger/include
 LIBLOG_OBJS := $(patsubst %.c, $(OUT_OBJ_PATH)/%.o, $(LIBLOG_CFILES))
 
 $(OUT_LIB_PATH)/liblog.a: $(LIBLOG_OBJS)
-	@echo "[Archiving:" $(notdir $@)"]"
-	@mkdir -p $(dir $@)
-	@$(AR) rcu $@ $^
-
-# ------------------------------------
-
-# EEPROM Library ---------------------
-LIBEEPROM_CFILES     := EEPROM/eeprom.c
-INCLUDES             += -I$(PROJECT_PATH)/EEPROM/include
-
-LIBEEPROM_OBJS := $(patsubst %.c, $(OUT_OBJ_PATH)/%.o, $(LIBEEPROM_CFILES))
-
-$(OUT_LIB_PATH)/libeeprom.a: $(LIBEEPROM_OBJS)
-	@echo "[Archiving:" $(notdir $@)"]"
-	@mkdir -p $(dir $@)
-	@$(AR) rcu $@ $^
-
-# ------------------------------------
-
-# MEM PART Library ---------------------
-LIBMEMPART_CFILES     := mem_part/mem_part.c
-INCLUDES              += -I$(PROJECT_PATH)/mem_part/include
-
-LIBMEMPART_OBJS := $(patsubst %.c, $(OUT_OBJ_PATH)/%.o, $(LIBMEMPART_CFILES))
-
-$(OUT_LIB_PATH)/libmem_part.a: $(LIBMEMPART_OBJS)
 	@echo "[Archiving:" $(notdir $@)"]"
 	@mkdir -p $(dir $@)
 	@$(AR) rcu $@ $^

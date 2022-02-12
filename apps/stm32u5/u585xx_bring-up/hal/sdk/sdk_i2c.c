@@ -86,19 +86,19 @@ void sdk_i2c_set_clock(I2C_TypeDef *I2C, uint32_t speed, uint32_t sys_core) {
     }
 }
 
-void sdk_i2c_disable(I2C_TypeDef *I2C) {
+inline void sdk_i2c_disable(I2C_TypeDef *I2C) {
     CLEAR_BIT(I2C->CR1, I2C_CR1_PE);
 }
 
-void sdk_i2c_enable(I2C_TypeDef *I2C) {
+inline void sdk_i2c_enable(I2C_TypeDef *I2C) {
     SET_BIT(I2C->CR1, I2C_CR1_PE);
 }
 
-void sdk_i2c_enable_dnf(I2C_TypeDef *I2C) {
+inline void sdk_i2c_enable_dnf(I2C_TypeDef *I2C) {
     SET_BIT(I2C->CR1, I2C_CR1_ANFOFF);
 }
 
-void sdk_i2c_disable_dnf(I2C_TypeDef *I2C) {
+inline void sdk_i2c_disable_dnf(I2C_TypeDef *I2C) {
     CLEAR_BIT(I2C->CR1, I2C_CR1_ANFOFF);
 }
 
@@ -114,15 +114,15 @@ void sdk_i2c_set_dnf(I2C_TypeDef *I2C, uint32_t dnf_level) {
     MODIFY_REG(I2C->CR1, I2C_CR1_DNF, dnf_level << I2C_CR1_DNF_Pos);
 }
 
-void sdk_i2c_enable_stretch(I2C_TypeDef *I2C) {
+inline void sdk_i2c_enable_stretch(I2C_TypeDef *I2C) {
     CLEAR_BIT(I2C->CR1, I2C_CR1_NOSTRETCH);
 }
 
-void sdk_i2c_disable_stretch(I2C_TypeDef *I2C) {
+inline void sdk_i2c_disable_stretch(I2C_TypeDef *I2C) {
     SET_BIT(I2C->CR1, I2C_CR1_NOSTRETCH);
 }
 
-bool sdk_i2c_read_nack(I2C_TypeDef *I2C) {
+inline bool sdk_i2c_read_nack(I2C_TypeDef *I2C) {
     return READ_BIT(I2C->ISR, I2C_ICR_NACKCF);
 }
 
@@ -138,33 +138,33 @@ void sdk_i2c_set_slave_addr(I2C_TypeDef *I2C, uint32_t addr) {
     MODIFY_REG(I2C->CR2, I2C_CR2_SADD_Msk, addr);
 }
 
-void sdk_i2c_set_nbytes(I2C_TypeDef *I2C, uint32_t n_bytes) {
+inline void sdk_i2c_set_nbytes(I2C_TypeDef *I2C, uint32_t n_bytes) {
     n_bytes &= 0x00FF; // Max 8-bits (255 value)
 
     MODIFY_REG(I2C->CR2, I2C_CR2_NBYTES_Msk, n_bytes << I2C_CR2_NBYTES_Pos);
 }
 
-void sdk_i2c_use_7bit_addr(I2C_TypeDef *I2C) {
+inline void sdk_i2c_use_7bit_addr(I2C_TypeDef *I2C) {
     CLEAR_BIT(I2C->CR2, I2C_CR2_ADD10);
 }
 
-void sdk_i2c_use_10bit_addr(I2C_TypeDef *I2C) {
+inline void sdk_i2c_use_10bit_addr(I2C_TypeDef *I2C) {
     SET_BIT(I2C->CR2, I2C_CR2_ADD10);
 }
 
-void sdk_i2c_enable_autoend(I2C_TypeDef *I2C) {
+inline void sdk_i2c_enable_autoend(I2C_TypeDef *I2C) {
     SET_BIT(I2C->CR2, I2C_CR2_AUTOEND);
 }
 
-void sdk_i2c_disable_autoend(I2C_TypeDef *I2C) {
+inline void sdk_i2c_disable_autoend(I2C_TypeDef *I2C) {
     CLEAR_BIT(I2C->CR2, I2C_CR2_AUTOEND);
 }
 
-void sdk_i2c_set_write_dir(I2C_TypeDef *I2C) {
+inline void sdk_i2c_set_write_dir(I2C_TypeDef *I2C) {
     CLEAR_BIT(I2C->CR2, I2C_CR2_RD_WRN);
 }
 
-void sdk_i2c_set_read_dir(I2C_TypeDef *I2C) {
+inline void sdk_i2c_set_read_dir(I2C_TypeDef *I2C) {
     SET_BIT(I2C->CR2, I2C_CR2_RD_WRN);
 }
 
@@ -175,24 +175,24 @@ void sdk_i2c_send_start(I2C_TypeDef *I2C) {
     }
 }
 
-void sdk_i2c_send_stop(I2C_TypeDef *I2C) {
+inline void sdk_i2c_send_stop(I2C_TypeDef *I2C) {
     SET_BIT(I2C->CR2, I2C_CR2_STOP);
 }
 
-bool sdk_i2c_is_tx_reg_empty(I2C_TypeDef *I2C) {
+inline bool sdk_i2c_is_tx_reg_empty(I2C_TypeDef *I2C) {
     return READ_BIT(I2C->ISR, I2C_ISR_TXIS);
 }
 
-void sdk_i2c_load_tx_reg(I2C_TypeDef *I2C, uint32_t data) {
+inline void sdk_i2c_load_tx_reg(I2C_TypeDef *I2C, uint32_t data) {
     data &= 0x00FF; // Max 8-bits
 
     MODIFY_REG(I2C->TXDR, I2C_TXDR_TXDATA_Msk, data << I2C_TXDR_TXDATA_Pos);
 }
 
-bool sdk_i2c_is_rx_reg_full(I2C_TypeDef *I2C) {
+inline bool sdk_i2c_is_rx_reg_full(I2C_TypeDef *I2C) {
     return READ_BIT(I2C->ISR, I2C_ISR_RXNE);
 }
 
-uint32_t sdk_i2c_read_rx_reg(I2C_TypeDef *I2C) {
+inline uint32_t sdk_i2c_read_rx_reg(I2C_TypeDef *I2C) {
     return READ_BIT(I2C->RXDR, I2C_RXDR_RXDATA) & 0x00FF;
 }
