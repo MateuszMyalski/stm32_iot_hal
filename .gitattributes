@@ -1,0 +1,9 @@
+# force as binary, turn off deltas
+*.jpg binary -delta
+*.jpeg binary -delta
+*.png binary -delta
+*.gif binary -delta
+*.pdf binary -delta
+*.zip binary -delta
+*.gz binary -delta
+tools/toolchain/* binary -delta
