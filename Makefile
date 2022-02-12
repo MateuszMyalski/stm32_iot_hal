@@ -1,7 +1,7 @@
 # -*- MakeFile -*-
 
 # TOOLCHAIN CONFIGURATION
-TOOLCHAIN_PATH := $(CURDIR)/tools/toolchain/linux/gcc-arm-none-eabi-10.3-2021.10/bin
+TOOLCHAIN_PATH := $(CURDIR)/tools/toolchain/gcc-arm-none-eabi/bin
 ARM_NONE_EABI_PREFIX := $(TOOLCHAIN_PATH)/arm-none-eabi
 
 AS   := $(ARM_NONE_EABI_PREFIX)-as

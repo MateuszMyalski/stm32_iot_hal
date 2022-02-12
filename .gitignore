@@ -9,3 +9,6 @@ out
 
 # Misc. files
 *.log
+
+# Toolchain folder
+tools/toolchain/*

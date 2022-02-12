@@ -1,5 +1,5 @@
 #!/bin/bash
-GDB_PATH='tools/toolchain/linux/gcc-arm-none-eabi-10.3-2021.10/bin/arm-none-eabi-gdb'
+GDB_PATH='tools/toolchain/gcc-arm-none-eabi/bin/arm-none-eabi-gdb'
 GDB_FALGS="-ex 'target remote $1:3333'"
 GDB_START="${GDB_PATH} $2 ${GDB_FALGS}"
 
