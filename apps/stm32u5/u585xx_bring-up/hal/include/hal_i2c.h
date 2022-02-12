@@ -56,4 +56,7 @@ int hal_i2c_master_read(I2C_TypeDef *I2C, uint16_t dev_addr, uint8_t reg_addr, u
  */
 int hal_i2c_master_write(I2C_TypeDef *I2C, uint16_t dev_addr, uint8_t reg_addr, const uint8_t *data, size_t len);
 
+int hal_i2c_memory_read(I2C_TypeDef *I2C, uint16_t dev_addr, uint16_t reg_addr, uint8_t *data, size_t len);
+int hal_i2c_memory_write(I2C_TypeDef *I2C, uint16_t dev_addr, uint16_t reg_addr, const uint8_t *data, size_t len);
+
 #endif
