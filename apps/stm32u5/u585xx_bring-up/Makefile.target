@@ -38,7 +38,8 @@ SFILES   := system/startup_stm32u585xx.s
 
 SYSTEM_CFILES := system/handlers.c \
 				system/syscalls.c \
-				system/system_stm32u5xx.c
+				system/system_stm32u5xx.c \
+				system/delay.c
 
 BSP_CFILES := bsp/led.c \
 			  bsp/bsp_init.c \
@@ -49,7 +50,9 @@ CFILES := main.c
 CFILES += ${SYSTEM_CFILES} ${BSP_CFILES}
 
 LIBS += $(OUT_LIB_PATH)/libhal.a \
-		$(OUT_LIB_PATH)/liblog.a
+		$(OUT_LIB_PATH)/liblog.a \
+		$(OUT_LIB_PATH)/libeeprom.a \
+		$(OUT_LIB_PATH)/libmem_part.a
 
 
 .PHONY: all
@@ -57,14 +60,19 @@ all : $(TARGET).hex
 
 
 # HAL Library ------------------------
-LIBHAL_CFILES     := hal/gpio.c \
-					 hal/delay.c \
-					 hal/i2c.c
-INCLUDES          += -I$(PROJECT_PATH)/hal/include
+LIBHAL_CFILES := hal/hal_gpio.c \
+				hal/hal_i2c.c
+
+SDK_CFILES := hal/sdk/sdk_gpio.c \
+            hal/sdk/sdk_i2c.c
+
+INCLUDES += -I$(PROJECT_PATH)/hal/include \
+			-I$(PROJECT_PATH)/hal/sdk/include
 
 LIBHAL_OBJS := $(patsubst %.c, $(OUT_OBJ_PATH)/%.o, $(LIBHAL_CFILES))
+SDK_OBJS := $(patsubst %.c, $(OUT_OBJ_PATH)/%.o, $(SDK_CFILES))
 
-$(OUT_LIB_PATH)/libhal.a: $(LIBHAL_OBJS)
+$(OUT_LIB_PATH)/libhal.a: $(LIBHAL_OBJS) $(SDK_OBJS)
 	@echo "[Archiving:" $(notdir $@)"]"
 	@mkdir -p $(dir $@)
 	@$(AR) rcu $@ $^
@@ -78,6 +86,32 @@ INCLUDES          += -I$(PROJECT_PATH)/logger/include
 LIBLOG_OBJS := $(patsubst %.c, $(OUT_OBJ_PATH)/%.o, $(LIBLOG_CFILES))
 
 $(OUT_LIB_PATH)/liblog.a: $(LIBLOG_OBJS)
+	@echo "[Archiving:" $(notdir $@)"]"
+	@mkdir -p $(dir $@)
+	@$(AR) rcu $@ $^
+
+# ------------------------------------
+
+# EEPROM Library ---------------------
+LIBEEPROM_CFILES     := EEPROM/eeprom.c
+INCLUDES             += -I$(PROJECT_PATH)/EEPROM/include
+
+LIBEEPROM_OBJS := $(patsubst %.c, $(OUT_OBJ_PATH)/%.o, $(LIBEEPROM_CFILES))
+
+$(OUT_LIB_PATH)/libeeprom.a: $(LIBEEPROM_OBJS)
+	@echo "[Archiving:" $(notdir $@)"]"
+	@mkdir -p $(dir $@)
+	@$(AR) rcu $@ $^
+
+# ------------------------------------
+
+# MEM PART Library ---------------------
+LIBMEMPART_CFILES     := mem_part/mem_part.c
+INCLUDES              += -I$(PROJECT_PATH)/mem_part/include
+
+LIBMEMPART_OBJS := $(patsubst %.c, $(OUT_OBJ_PATH)/%.o, $(LIBMEMPART_CFILES))
+
+$(OUT_LIB_PATH)/libmem_part.a: $(LIBMEMPART_OBJS)
 	@echo "[Archiving:" $(notdir $@)"]"
 	@mkdir -p $(dir $@)
 	@$(AR) rcu $@ $^
