@@ -1,5 +1,5 @@
-#ifndef BSP_HPP
-#define BSP_HPP
+#ifndef BSP_BSP_HPP
+#define BSP_BSP_HPP
 
 #define BSP_RED_LED_PORT GPIOH
 #define BSP_RED_LED_PIN 6U

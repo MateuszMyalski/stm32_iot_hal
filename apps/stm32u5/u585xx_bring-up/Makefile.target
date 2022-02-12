@@ -50,10 +50,12 @@ CFILES := main.c
 CFILES += ${SYSTEM_CFILES} ${BSP_CFILES}
 
 LIBS += $(OUT_LIB_PATH)/libhal.a \
-		$(OUT_LIB_PATH)/liblog.a
+		$(OUT_LIB_PATH)/liblogger.a \
+		$(OUT_LIB_PATH)/libextmem.a
 
 include $(PROJECT_PATH)/hal/Makefile
 include $(PROJECT_PATH)/logger/Makefile
+include $(PROJECT_PATH)/extmem/Makefile
 
 .PHONY: all
 all : $(TARGET).hex

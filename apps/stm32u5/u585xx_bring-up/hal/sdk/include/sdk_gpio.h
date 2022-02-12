@@ -1,5 +1,5 @@
-#ifndef SDK_GPIO_H
-#define SDK_GPIO_H
+#ifndef HAL_SDK_GPIO_H
+#define HAL_SDK_GPIO_H
 #include <stdbool.h>
 #include "stm32u5xx.h"
 #include "stm32u585xx.h"

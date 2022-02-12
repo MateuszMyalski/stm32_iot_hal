@@ -1,5 +1,5 @@
-#ifndef I2C_H
-#define I2C_H
+#ifndef HAL_I2C_H
+#define HAL_I2C_H
 #include <stddef.h>
 #include "hal_common.h"
 

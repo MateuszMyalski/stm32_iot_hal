@@ -1,11 +1,11 @@
 # -*- MakeFile -*-
 
-LIBLOG_CFILES     := logger/tiny_printf.c
-INCLUDES          += -I$(PROJECT_PATH)/logger/include
+LIBLOGGER_CFILES := logger/tiny_printf.c
+INCLUDES         += -I$(PROJECT_PATH)/logger/include
 
-LIBLOG_OBJS := $(patsubst %.c, $(OUT_OBJ_PATH)/%.o, $(LIBLOG_CFILES))
+LIBLOGGER_OBJS := $(patsubst %.c, $(OUT_OBJ_PATH)/%.o, $(LIBLOGGER_CFILES))
 
-$(OUT_LIB_PATH)/liblog.a: $(LIBLOG_OBJS)
+$(OUT_LIB_PATH)/liblogger.a: $(LIBLOGGER_OBJS)
 	@echo "[Archiving:" $(notdir $@)"]"
 	@mkdir -p $(dir $@)
 	@$(AR) rcu $@ $^

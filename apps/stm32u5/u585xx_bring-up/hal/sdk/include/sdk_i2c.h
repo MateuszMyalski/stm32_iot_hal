@@ -1,5 +1,5 @@
-#ifndef SDK_I2C_H
-#define SDK_I2C_H
+#ifndef HAL_SDK_I2C_H
+#define HAL_SDK_I2C_H
 #include <stdbool.h>
 #include "stm32u585xx.h"
 #include "stm32u5xx.h"
