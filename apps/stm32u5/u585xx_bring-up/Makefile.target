@@ -43,7 +43,8 @@ SYSTEM_CFILES := system/handlers.c \
 
 BSP_CFILES := bsp/led.c \
 			  bsp/bsp_init.c \
-			  bsp/periphs.c
+			  bsp/periphs.c \
+			  bsp/extmem.c
 
 CFILES := main.c
 

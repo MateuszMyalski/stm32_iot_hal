@@ -18,6 +18,7 @@ typedef struct {
     uint32_t flags;
     uint16_t begin_address;
     uint16_t end_address;
+    uint16_t length;
 } partition_entry_t;
 
 /**

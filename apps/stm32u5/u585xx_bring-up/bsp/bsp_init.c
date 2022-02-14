@@ -56,6 +56,13 @@ int bsp_init(void) {
     }
     LOG_INFO("Initialized bsp_init_periphs\n");
 
+    err = bsp_init_eeprom();
+    if (0 != err) {
+        LOG_ERR("Cannot initialize bsp_init_eeprom\n");
+        ExitOnError(err);
+    }
+    LOG_INFO("Initialized bsp_init_eeprom\n");
+
 exit:
     while (0 != err) {
         // Hang in init on error
