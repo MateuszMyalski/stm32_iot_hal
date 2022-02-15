@@ -1,4 +1,9 @@
 #include "eeprom.h"
+
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "partition.h"
 
 static bool is_magic_valid(const partition_entry_t *partition, const uint8_t *partion_buffer) {
@@ -7,7 +12,7 @@ static bool is_magic_valid(const partition_entry_t *partition, const uint8_t *pa
         return false;
     }
 
-    return strncmp(partion_buffer, partition->magic, partition->magic_size);
+    return strncmp((const char *) partion_buffer, partition->magic, partition->magic_size) == 0;
 }
 
 int eeprom_load_partition(const eeprom_t *eeprom, const char *part_name, uint8_t *buffer) {
@@ -22,7 +27,7 @@ int eeprom_load_partition(const eeprom_t *eeprom, const char *part_name, uint8_t
 
     /* Look for partition */
     const partition_entry_t *partition = NULL;
-    partition = mem_partition_get_by_name(eeprom->partition_table, eeprom->partition_table_size, part_name);
+    partition = extmem_partition_get_by_name(eeprom->partition_table, eeprom->partition_table_size, part_name);
     if (NULL == partition) {
         // Partition not found
         return -1;
@@ -65,7 +70,7 @@ int eeprom_store_partition(const eeprom_t *eeprom, const char *part_name, const 
 
     /* Look for partition */
     const partition_entry_t *partition = NULL;
-    partition = mem_partition_get_by_name(eeprom->partition_table, eeprom->partition_table_size, part_name);
+    partition = extmem_partition_get_by_name(eeprom->partition_table, eeprom->partition_table_size, part_name);
     if (NULL == partition) {
         // Partition not found
         return -1;
@@ -106,23 +111,27 @@ int eeprom_erease_partition(const eeprom_t *eeprom, const char *part_name, uint8
 
     /* Look for partition */
     const partition_entry_t *partition = NULL;
-    partition = mem_partition_get_by_name(eeprom->partition_table, eeprom->partition_table_size, part_name);
+    partition = extmem_partition_get_by_name(eeprom->partition_table, eeprom->partition_table_size, part_name);
     if (NULL == partition) {
         // Partition not found
         return -1;
     }
 
     /* Clear the partition */
-    uint8_t *empty_buffer = malloc(partition->length * sizoef(uint8_t));
-    if(NULL == empty_buffer) {
+    uint8_t *empty_buffer = malloc(partition->length * sizeof(uint8_t));
+    if (NULL == empty_buffer) {
         // Error while allocating memory
         return -1;
     }
 
-    memset(empty_buffer, erease_symbol, partition->length * sizoef(uint8_t));
+    memset(empty_buffer, erease_symbol, partition->length * sizeof(uint8_t));
 
     int err = 0;
     err = eeprom->tx_data_cb(partition->begin_address, empty_buffer, partition->length);
+    if (err) {
+        // Error while writting partiton
+        return -1;
+    }
     free(empty_buffer);
 
     return 0;

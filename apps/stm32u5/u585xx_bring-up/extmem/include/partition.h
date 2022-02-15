@@ -33,8 +33,8 @@ typedef struct {
  * @param name - Partition name
  * @return NULL - when not found / in case found partition pointer to the partition entry
  */
-const partition_entry_t* mem_partition_get_by_name(const partition_entry_t* part_table, size_t part_table_size,
-                                                   const char* name);
+const partition_entry_t* extmem_partition_get_by_name(const partition_entry_t* part_table, size_t part_table_size,
+                                                      const char* name);
 
 /**
  * @brief Find partition by the address
@@ -43,7 +43,7 @@ const partition_entry_t* mem_partition_get_by_name(const partition_entry_t* part
  * @param addr - Memory address
  * @return NULL - when not found / in case found partiition pointer to the partition entry
  */
-const partition_entry_t* mem_partition_get_by_addr(const partition_entry_t* part_table, size_t part_table_size,
-                                                   uint16_t addr);
+const partition_entry_t* extmem_partition_get_by_addr(const partition_entry_t* part_table, size_t part_table_size,
+                                                      uint16_t addr);
 
 #endif

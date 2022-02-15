@@ -24,8 +24,9 @@
 #define BSP_I2C1_SCL_PORT GPIOB
 #define BSP_I2C1_SCL_PIN 8U
 
-#define BSP_EEPROM_I2C       I2C2
-#define BSP_EEPROM_ADDR      0xADU
+#define BSP_EEPROM_I2C              I2C2
+#define BSP_EEPROM_ADDR             0xADU
+#define BSP_EEPROM_WRITE_DELAY_MS   6UL
 
 #define ExitOnError(x)  \
     do {                \
