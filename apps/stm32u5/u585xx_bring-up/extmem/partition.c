@@ -2,7 +2,7 @@
 #include <string.h>
 
 const partition_entry_t* extmem_partition_get_by_name(const partition_entry_t* part_table, size_t part_table_size,
-                                                   const char* name) {
+                                                      const char* name) {
     if ((NULL == part_table) || (NULL == name) || (0 == part_table_size)) {
         return NULL;
     }
@@ -17,7 +17,7 @@ const partition_entry_t* extmem_partition_get_by_name(const partition_entry_t* p
 }
 
 const partition_entry_t* extmem_partition_get_by_addr(const partition_entry_t* part_table, size_t part_table_size,
-                                                   uint16_t addr) {
+                                                      uint16_t addr) {
     if ((NULL == part_table) || (0 == part_table_size)) {
         return NULL;
     }

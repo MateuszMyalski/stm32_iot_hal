@@ -5,15 +5,15 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define MAX_PARTITON_NAME_SIZE   32UL
-#define MAX_PARTITON_MAGIC_SIZE  32UL
+#define MAX_PARTITON_NAME_SIZE 32UL
+#define MAX_PARTITON_MAGIC_SIZE 32UL
 
 typedef enum {
-    PARTITION_FLAG_WRITE_PROTECT        = 1U,
-    PARTITION_FLAG_READ_PROTECT         = (1U << 2UL),
-    PARTITION_FLAG_ENCRYPTED            = (1U << 3UL),
-    PARTITION_FLAG_USE_CRC              = (1U << 4UL),
-    PARTITION_FLAG_NOT_VALIDATE_MAGIC   = (1U << 5UL),
+    PARTITION_FLAG_WRITE_PROTECT = 1U,
+    PARTITION_FLAG_READ_PROTECT = (1U << 2UL),
+    PARTITION_FLAG_ENCRYPTED = (1U << 3UL),
+    PARTITION_FLAG_USE_CRC = (1U << 4UL),
+    PARTITION_FLAG_NOT_VALIDATE_MAGIC = (1U << 5UL),
 } partition_flag_t;
 
 typedef struct {
