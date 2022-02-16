@@ -59,7 +59,8 @@ all : $(TARGET).hex
 
 # HAL Library ------------------------
 LIBHAL_CFILES := hal/hal_gpio.c \
-				hal/hal_i2c.c
+				hal/hal_i2c.c \
+				hal/hal_usart.c
 
 SDK_CFILES := hal/sdk/sdk_gpio.c \
             hal/sdk/sdk_i2c.c
