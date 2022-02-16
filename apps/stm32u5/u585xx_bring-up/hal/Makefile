@@ -1,10 +1,10 @@
 # -*- MakeFile -*-
 
 LIBHAL_CFILES := hal/hal_gpio.c \
-				hal/hal_i2c.c
+                 hal/hal_i2c.c
 
 SDK_CFILES := hal/sdk/sdk_gpio.c \
-            hal/sdk/sdk_i2c.c
+              hal/sdk/sdk_i2c.c
 
 INCLUDES += -I$(PROJECT_PATH)/hal/include \
 			-I$(PROJECT_PATH)/hal/sdk/include
