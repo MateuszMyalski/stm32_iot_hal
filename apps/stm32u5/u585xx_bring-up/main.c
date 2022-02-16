@@ -52,59 +52,9 @@ void hts221_simple_test(void) {
     }
 }
 
-void init_eeprom_partitions(void) {
-    int err = 0;
-
-    err = eeprom_erease_partition(&extmem_eeprom, EEPROM_PART_DEVICE_INFO_NAME, 0x00);
-    if(err){
-        error_blink();
-        return;
-    }
-    delay_ms(BSP_EEPROM_WRITE_DELAY_MS);
-
-    err = eeprom_erease_partition(&extmem_eeprom, EEPROM_PART_CNT_INVALID_BOOT_NAME, 0x00);
-    if(err){
-        error_blink();
-        return;
-    }
-    delay_ms(BSP_EEPROM_WRITE_DELAY_MS);
-
-    err = eeprom_erease_partition(&extmem_eeprom, EEPROM_PART_BOOT_CONFIG_NAME, 0x00);
-    if(err){
-        error_blink();
-        return;
-    }
-    delay_ms(BSP_EEPROM_WRITE_DELAY_MS);
-
-    err = eeprom_erease_partition(&extmem_eeprom, EEPROM_PART_BOOT_WIFI_CREDS_A_NAME, 0x00);
-    if(err){
-        error_blink();
-        return;
-    }
-    delay_ms(BSP_EEPROM_WRITE_DELAY_MS);
-
-    err = eeprom_erease_partition(&extmem_eeprom, EEPROM_PART_BOOT_WIFI_CREDS_B_NAME, 0x00);
-    if(err){
-        error_blink();
-        return;
-    }
-    delay_ms(BSP_EEPROM_WRITE_DELAY_MS);
-}
-
 int main() {
     Assert(bsp_init(), 0);
-    // hts221_simple_test();
-    // init_eeprom_partitions();
-
-    part_device_info_t device_info = {0xFF};
-    int err = 0;
-    // err = eeprom_store_partition(&extmem_eeprom, EEPROM_PART_DEVICE_INFO_NAME, (const uint8_t *)&device_info);
-    err = eeprom_load_partition(&extmem_eeprom, EEPROM_PART_DEVICE_INFO_NAME, (uint8_t *)&device_info);
-    if(err){
-        error_blink();
-        while(1);
-    }
-
+    hts221_simple_test();
 
     while (1) {
         bool r_value = !hal_gpio_read(BSP_USER_BUTTON_PORT, BSP_USER_BUTTON_PIN);

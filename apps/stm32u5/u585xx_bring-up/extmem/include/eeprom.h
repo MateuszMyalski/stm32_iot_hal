@@ -47,11 +47,4 @@ int eeprom_store_partition(const eeprom_t *eeprom, const char *part_name, const 
  */
 int eeprom_erease_partition(const eeprom_t *eeprom, const char *part_name, uint8_t erease_symbol);
 
-int eeprom_write_and_verify_partition(const eeprom_t *eeprom, const uint8_t *buffer);
-
-int eeprom_read_partition_from(const eeprom_t *eeprom, uint8_t *buffer, uint16_t begin_offset, size_t len);
-int eeprom_write_partition_from(const eeprom_t *eeprom, const uint8_t *buffer, uint16_t begin_offset, size_t len);
-int eeprom_write_and_verify_partition_from(const eeprom_t *eeprom, const uint8_t *buffer, uint16_t begin_offset,
-                                           size_t len);
-
 #endif

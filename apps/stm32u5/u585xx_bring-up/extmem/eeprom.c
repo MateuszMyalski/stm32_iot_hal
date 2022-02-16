@@ -12,7 +12,7 @@ static bool is_magic_valid(const partition_entry_t *partition, const uint8_t *pa
         return false;
     }
 
-    return strncmp((const char *) partion_buffer, partition->magic, partition->magic_size) == 0;
+    return strncmp((const char *)partion_buffer, partition->magic, partition->magic_size) == 0;
 }
 
 int eeprom_load_partition(const eeprom_t *eeprom, const char *part_name, uint8_t *buffer) {
