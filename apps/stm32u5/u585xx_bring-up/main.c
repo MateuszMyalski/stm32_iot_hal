@@ -5,6 +5,7 @@
 #include "delay.h"
 #include "hal_gpio.h"
 #include "hal_i2c.h"
+#include "hal_usart.h"
 #include "logger.h"
 
 void error_blink() {
@@ -51,8 +52,19 @@ void hts221_simple_test(void) {
 }
 
 int main() {
+
+    uint8_t buff[] = "0123456789abcdef\n0123456789abcdef\n";
+
     Assert(bsp_init(), 0);
     hts221_simple_test();
+
+    hal_gpio_write(BSP_STMOD1_USART2_SPI1_SEL_PORT, BSP_STMOD1_USART2_SPI1_SEL_PIN, true);
+
+    delay_ms(1000);
+    hal_usart_tx(USART2, buff, 34);
+    delay_ms(1000);
+    hal_usart_tx(USART2, buff, 33);
+    delay_ms(1000);
 
     while (1) {
         bool r_value = !hal_gpio_read(BSP_USER_BUTTON_PORT, BSP_USER_BUTTON_PIN);
