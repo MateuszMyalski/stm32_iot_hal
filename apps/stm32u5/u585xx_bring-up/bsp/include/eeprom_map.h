@@ -5,7 +5,6 @@
 #include <assert.h>
 
 #define EEPROM_PART_MAGIC_SIZE  8UL
-#define EEPROM_PART_CRC_SIZE    8UL
 
 #define EEPROM_SIZE         32000UL // 256Kbit - 32Kbyte - 32000 bytes
 #define EEPROM_PAGE_SIZE    64UL
@@ -18,7 +17,7 @@
  * -- DATA
  * --
  * ----------
- * -- crc
+ * -- crc32
  */
 
 typedef struct __attribute__((packed, aligned(1))) {
@@ -30,7 +29,7 @@ typedef struct __attribute__((packed, aligned(1))) {
     uint16_t minor_imgB_version;
     uint16_t major_imgB_version;
     uint8_t _reserved[36];
-    uint8_t crc[EEPROM_PART_CRC_SIZE];
+    uint64_t crc32;
 } part_device_info_t;
 
 typedef struct __attribute__((packed, aligned(1))) {
@@ -38,7 +37,7 @@ typedef struct __attribute__((packed, aligned(1))) {
     uint32_t invalid_boot_A;
     uint32_t invalid_boot_B;
     uint8_t _reserved[40];
-    uint8_t crc[EEPROM_PART_CRC_SIZE];
+    uint64_t crc32;
 } part_cnt_invalid_boot_t;
 
 typedef struct __attribute__((packed, aligned(1))) {
@@ -50,7 +49,7 @@ typedef struct __attribute__((packed, aligned(1))) {
     uint32_t error_flag_imgA;
     uint32_t error_flag_imgB;
     uint8_t _reserved[24];
-    uint8_t crc[EEPROM_PART_CRC_SIZE];
+    uint64_t crc32;
 } part_boot_config_t;
 
 typedef struct __attribute__((packed, aligned(1))) {
@@ -58,7 +57,7 @@ typedef struct __attribute__((packed, aligned(1))) {
     uint8_t SSID[32];
     uint8_t password[32];
     uint8_t _reserved[48];
-    uint8_t crc[EEPROM_PART_CRC_SIZE];
+    uint64_t crc32;
 } part_wifi_creds_A_t;
 
 typedef struct __attribute__((packed, aligned(1))) {
@@ -66,7 +65,7 @@ typedef struct __attribute__((packed, aligned(1))) {
     uint8_t SSID[32];
     uint8_t password[32];
     uint8_t _reserved[48];
-    uint8_t crc[EEPROM_PART_CRC_SIZE];
+    uint64_t crc32;
 } part_wifi_creds_B_t;
 
 #define EEPROM_PART_DEVICE_INFO_MAGIC           {0x5e, 0x64, 0x65, 0x76, 0x69, 0x6e, 0x66, 0x6f}  // "^devinfo"

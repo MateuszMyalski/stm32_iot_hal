@@ -6,6 +6,10 @@
 
 #include "partition.h"
 
+#define CRC_INIT_VALUE 0xFFFFFFFFUL
+
+static uint64_t crc32(const uint8_t *input, size_t input_size, uint64_t init);
+
 static bool is_magic_valid(const partition_entry_t *partition, const uint8_t *partion_buffer) {
     if ((partition->magic_size <= 0) || (partition->magic_size > MAX_PARTITON_NAME_SIZE)) {
         // Problem with partition magic size initialization
@@ -53,7 +57,13 @@ int eeprom_load_partition(const eeprom_t *eeprom, const char *part_name, uint8_t
     }
 
     /* Check CRC */
-    // TODO
+    size_t buffer_size_to_crc = partition->length - sizeof(uint64_t);
+    uint64_t calc_crc = crc32(buffer, buffer_size_to_crc, CRC_INIT_VALUE);
+    uint64_t part_crc = *(buffer + buffer_size_to_crc);
+    if(calc_crc != part_crc) {
+        // Error in crc
+        return -1;
+    }
 
     return 0;
 }
@@ -84,8 +94,9 @@ int eeprom_store_partition(const eeprom_t *eeprom, const char *part_name, const 
 
     /* When necessary compute CRC */
     if (partition->flags & PARTITION_FLAG_USE_CRC) {
-        // TODO
-        return 0;
+        size_t buffer_size_to_crc = partition->length - sizeof(uint64_t);
+        uint64_t *crc_slot = buffer + buffer_size_to_crc;
+        *crc_slot = crc32(buffer, buffer_size_to_crc, CRC_INIT_VALUE);
     }
 
     /* Store partition */
@@ -132,6 +143,7 @@ int eeprom_erease_partition(const eeprom_t *eeprom, const char *part_name, uint8
         // Error while writting partiton
         return -1;
     }
+
     free(empty_buffer);
 
     return 0;
