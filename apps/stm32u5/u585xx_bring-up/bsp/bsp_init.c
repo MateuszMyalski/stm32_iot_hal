@@ -1,4 +1,5 @@
 #include "bsp.h"
+#include "utils.h"
 #include "logger.h"
 #include "stm32u585xx.h"
 #include "stm32u5xx.h"

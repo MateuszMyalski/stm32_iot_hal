@@ -28,21 +28,6 @@
 #define BSP_EEPROM_ADDR             0xADU
 #define BSP_EEPROM_WRITE_DELAY_MS   6UL
 
-#define ExitOnError(x)  \
-    do {                \
-        if (0 != (x)) { \
-            goto exit;  \
-        }               \
-    } while (0);
-
-#define Assert(_expression, _expected)      \
-    do {                                    \
-        if ((_expression) != (_expected)) { \
-            while (1)                       \
-                ;                           \
-        }                                   \
-    } while (0);
-
 extern eeprom_t extmem_eeprom;
 extern partition_entry_t eeprom_part_table[];
 

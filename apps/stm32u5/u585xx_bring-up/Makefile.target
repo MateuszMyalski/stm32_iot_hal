@@ -6,6 +6,7 @@ PROJECT_PATH := $(APPS_PATH)/stm32u5/u585xx_bring-up
 
 INCLUDES := -I$(PROJECT_PATH)/system/include \
 			-I$(PROJECT_PATH)/bsp/include \
+			-I$(PROJECT_PATH)/modules/include \
 			-I$(CORE_PATH)/CMSIS
 
 CFLAGS   := -c \
@@ -46,9 +47,16 @@ BSP_CFILES := bsp/led.c \
 			  bsp/periphs.c \
 			  bsp/extmem.c
 
+MODULES_CFILES = modules/hts221_test.c \
+				 modules/memory.c \
+				 modules/factory_reset.c \
+				 modules/led_notifier.c
+
 CFILES := main.c
 
-CFILES += ${SYSTEM_CFILES} ${BSP_CFILES}
+CFILES += ${SYSTEM_CFILES} \
+		  ${BSP_CFILES} \
+		  ${MODULES_CFILES}
 
 LIBS += $(OUT_LIB_PATH)/libhal.a \
 		$(OUT_LIB_PATH)/liblogger.a \
