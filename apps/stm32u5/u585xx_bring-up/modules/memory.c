@@ -2,6 +2,7 @@
 #include "bsp.h"
 #include "eeprom.h"
 #include "eeprom_map.h"
+#include "delay.h"
 
 static void init_device_info(void) {
     part_device_info_t device_info =  {
@@ -19,8 +20,9 @@ static void init_device_info(void) {
     int err = 0;
     err = eeprom_store_partition(&extmem_eeprom, EEPROM_PART_DEVICE_INFO_NAME, (const uint8_t*)&device_info);
     delay_ms(BSP_EEPROM_WRITE_DELAY_MS);
-    err = eeprom_load_partition(&extmem_eeprom, EEPROM_PART_DEVICE_INFO_NAME, (uint8_t*)&device_info);
-    while(err);
+    if(err) {
+        error_blink();
+    }
 }
 
 // static void init_invalid_boot(void) {
@@ -80,6 +82,8 @@ void factory_reset_eeprom(void) {
 
 void get_device_info(part_device_info_t *device_info) {
     int err = 0;
-    err = eeprom_load_partition(&extmem_eeprom, EEPROM_PART_DEVICE_INFO_NAME, (uint8_t*)&device_info);
-
+    err = eeprom_load_partition(&extmem_eeprom, EEPROM_PART_DEVICE_INFO_NAME, (uint8_t *)device_info);
+    if(err) {
+        error_blink();
+    }
 }

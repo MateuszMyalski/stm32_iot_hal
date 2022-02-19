@@ -9,7 +9,7 @@ partition_entry_t eeprom_part_table[] = {
         EEPROM_PART_DEVICE_INFO_NAME,
         EEPROM_PART_DEVICE_INFO_MAGIC,
         EEPROM_PART_MAGIC_SIZE,
-        0x0U,
+        PARTITION_FLAG_USE_CRC,
         EEPROM_PART_DEVICE_INFO_BEGIN,
         EEPROM_PART_DEVICE_INFO_END,
         EEPROM_PART_DEVICE_INFO_SIZE

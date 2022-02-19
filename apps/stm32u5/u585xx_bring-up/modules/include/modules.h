@@ -2,6 +2,7 @@
 #define MODULES_MODULES_H
 
 #include <stdbool.h>
+#include "eeprom_map.h"
 
 /**
  * @brief Perform simple test on HTS221 sensor to test I2C connection.
@@ -35,6 +36,11 @@ bool check_factory_reset_trigger(void);
 void idle_notifier(void);
 
 
+/**
+ * @brief Reads device info from external storage.
+ * @param device_info - device info partition structure
+ * @return (void)
+ */
 void get_device_info(part_device_info_t *device_info);
 
 #endif

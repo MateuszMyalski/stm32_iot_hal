@@ -1,5 +1,5 @@
-#ifndef MODULES_MEMROY_H
-#define MODULES_MEMROY_H
+#ifndef MODULES_MEMORY_H
+#define MODULES_MEMORY_H
 
 /**
  * @brief Perform factory reset on all partitions

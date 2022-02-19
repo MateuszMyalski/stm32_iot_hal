@@ -5,10 +5,10 @@
 #include <string.h>
 
 #include "partition.h"
+#include "crc32.h"
+#include "logger.h"
 
 #define CRC_INIT_VALUE 0xFFFFFFFFUL
-
-static uint64_t crc32(const uint8_t *input, size_t input_size, uint64_t init);
 
 static bool is_magic_valid(const partition_entry_t *partition, const uint8_t *partion_buffer) {
     if ((partition->magic_size <= 0) || (partition->magic_size > MAX_PARTITON_NAME_SIZE)) {
@@ -52,18 +52,20 @@ int eeprom_load_partition(const eeprom_t *eeprom, const char *part_name, uint8_t
     }
 
     /* When necessary compute CRC */
-    if (!(partition->flags & PARTITION_FLAG_USE_CRC)) {
+    if (partition->flags & PARTITION_FLAG_USE_CRC) {
         return 0;
+        uint16_t buffer_size_to_crc = partition->length - sizeof(uint64_t);
+        uint64_t calc_crc = crc32(buffer, buffer_size_to_crc, CRC_INIT_VALUE);
+        uint64_t part_crc = 0x0;
+        memcpy(&part_crc, &buffer[buffer_size_to_crc], sizeof(uint64_t));
+
+        if(calc_crc != part_crc) {
+            // Error in crc
+            return -1;
+        }
     }
 
     /* Check CRC */
-    size_t buffer_size_to_crc = partition->length - sizeof(uint64_t);
-    uint64_t calc_crc = crc32(buffer, buffer_size_to_crc, CRC_INIT_VALUE);
-    uint64_t part_crc = *(buffer + buffer_size_to_crc);
-    if(calc_crc != part_crc) {
-        // Error in crc
-        return -1;
-    }
 
     return 0;
 }
@@ -92,19 +94,26 @@ int eeprom_store_partition(const eeprom_t *eeprom, const char *part_name, const 
         return -1;
     }
 
-    /* When necessary compute CRC */
-    if (partition->flags & PARTITION_FLAG_USE_CRC) {
-        size_t buffer_size_to_crc = partition->length - sizeof(uint64_t);
-        uint64_t *crc_slot = buffer + buffer_size_to_crc;
-        *crc_slot = crc32(buffer, buffer_size_to_crc, CRC_INIT_VALUE);
-    }
-
-    /* Store partition */
+    /* Store partition data */
     int err = 0;
     err = eeprom->tx_data_cb(partition->begin_address, buffer, partition->length);
     if (err) {
         // Error while writting partiton
         return -1;
+    }
+    delay_ms(10); // TODO Fix me!
+    /* Compute CRC */
+    if(partition->flags & PARTITION_FLAG_USE_CRC) {
+        uint16_t buffer_no_crc_length = partition->length - sizeof(uint64_t);
+        uint64_t calc_crc = crc32(buffer, buffer_no_crc_length, CRC_INIT_VALUE);
+
+        // Send just CRC to not edit the source buffer
+        uint16_t part_crc_addr = partition->begin_address + buffer_no_crc_length;
+        err = eeprom->tx_data_cb(part_crc_addr, (const uint8_t*)&calc_crc, sizeof(uint64_t));
+        if (err) {
+            // Error while writting partiton
+            return -1;
+        }
     }
 
     return 0;
@@ -141,6 +150,7 @@ int eeprom_erease_partition(const eeprom_t *eeprom, const char *part_name, uint8
     err = eeprom->tx_data_cb(partition->begin_address, empty_buffer, partition->length);
     if (err) {
         // Error while writting partiton
+        free(empty_buffer);
         return -1;
     }
 
