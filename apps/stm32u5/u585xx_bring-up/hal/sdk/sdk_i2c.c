@@ -1,6 +1,6 @@
 #include "sdk_i2c.h"
 
-void sdk_i2c_enable_AHB(I2C_TypeDef *I2C) {
+void sdk_i2c_enable_APB(I2C_TypeDef *I2C) {
     switch ((intptr_t)I2C) {
         case I2C1_BASE:
             SET_BIT(RCC->APB1ENR1, RCC_APB1ENR1_I2C1EN);
@@ -19,19 +19,19 @@ void sdk_i2c_enable_AHB(I2C_TypeDef *I2C) {
     }
 }
 
-void sdk_i2c_disable_AHB(I2C_TypeDef *I2C) {
+void sdk_i2c_disable_APB(I2C_TypeDef *I2C) {
     switch ((intptr_t)I2C) {
         case I2C1_BASE:
-            SET_BIT(RCC->APB1RSTR1, RCC_APB1RSTR1_I2C1RST);
+            CLEAR_BIT(RCC->APB1ENR1, RCC_APB1ENR1_I2C1EN);
             break;
         case I2C2_BASE:
-            SET_BIT(RCC->APB1RSTR1, RCC_APB1RSTR1_I2C2RST);
+            CLEAR_BIT(RCC->APB1ENR1, RCC_APB1ENR1_I2C2EN);
             break;
         case I2C3_BASE:
-            SET_BIT(RCC->APB3RSTR, RCC_APB3RSTR_I2C3RST);
+            CLEAR_BIT(RCC->APB3ENR, RCC_APB3ENR_I2C3EN);
             break;
         case I2C4_BASE:
-            SET_BIT(RCC->APB1RSTR2, RCC_APB1RSTR2_I2C4RST);
+            CLEAR_BIT(RCC->APB1ENR2, RCC_APB1ENR2_I2C4EN);
             break;
         default:
             break;
@@ -103,14 +103,14 @@ inline void sdk_i2c_disable_dnf(I2C_TypeDef *I2C) {
 }
 
 void sdk_i2c_set_dnf(I2C_TypeDef *I2C, uint32_t dnf_level) {
-    if(0 == dnf_level) {
+    if (0 == dnf_level) {
         CLEAR_BIT(I2C->CR1, I2C_CR1_ANFOFF);
     } else {
         SET_BIT(I2C->CR1, I2C_CR1_ANFOFF);
         return;
     }
 
-    dnf_level &= 0x000FU; // Max 4-bits
+    dnf_level &= 0x000FU;  // Max 4-bits
     MODIFY_REG(I2C->CR1, I2C_CR1_DNF, dnf_level << I2C_CR1_DNF_Pos);
 }
 
@@ -127,9 +127,9 @@ inline bool sdk_i2c_read_nack(I2C_TypeDef *I2C) {
 }
 
 void sdk_i2c_set_slave_addr(I2C_TypeDef *I2C, uint32_t addr) {
-    addr &= 0x07FFU; // Max 10-bits
+    addr &= 0x07FFU;  // Max 10-bits
 
-    if(addr > 0x00FFU) {
+    if (addr > 0x00FFU) {
         SET_BIT(I2C->CR2, I2C_CR2_ADD10);
     } else {
         CLEAR_BIT(I2C->CR2, I2C_CR2_ADD10);
@@ -139,7 +139,7 @@ void sdk_i2c_set_slave_addr(I2C_TypeDef *I2C, uint32_t addr) {
 }
 
 inline void sdk_i2c_set_nbytes(I2C_TypeDef *I2C, uint32_t n_bytes) {
-    n_bytes &= 0x00FF; // Max 8-bits (255 value)
+    n_bytes &= 0x00FF;  // Max 8-bits (255 value)
 
     MODIFY_REG(I2C->CR2, I2C_CR2_NBYTES_Msk, n_bytes << I2C_CR2_NBYTES_Pos);
 }
@@ -184,7 +184,7 @@ inline bool sdk_i2c_is_tx_reg_empty(I2C_TypeDef *I2C) {
 }
 
 inline void sdk_i2c_load_tx_reg(I2C_TypeDef *I2C, uint32_t data) {
-    data &= 0x00FF; // Max 8-bits
+    data &= 0x00FF;  // Max 8-bits
 
     MODIFY_REG(I2C->TXDR, I2C_TXDR_TXDATA_Msk, data << I2C_TXDR_TXDATA_Pos);
 }

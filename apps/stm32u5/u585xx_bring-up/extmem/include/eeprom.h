@@ -3,6 +3,16 @@
 
 #include "partition.h"
 
+typedef enum {
+    EEPROM_ERROR_OK = 0,
+    EEPROM_ERROR = -1,
+    EEPROM_ERROR_PARTITION_NOT_FOUND = -2,
+    EEPROM_ERROR_RX = -3,
+    EEPROM_ERROR_TX = -4,
+    EEPROM_ERROR_CRC = -5,
+    EEPROM_ERROR_MAGIC = -6
+} eeprom_error_t;
+
 typedef enum { NO_DEVICE = 0x0, M24256_D } device_t;
 
 typedef int (*tx_data_cb_t)(uint16_t mem_addr, const uint8_t *data, size_t len);
@@ -26,7 +36,7 @@ typedef struct {
  *                 The buffer size must be equal or greater than the partiton size
  * @return 0 - on success, -1 - on error
  */
-int eeprom_load_partition(const eeprom_t *eeprom, const char *part_name, uint8_t *buffer);
+eeprom_error_t eeprom_load_partition(const eeprom_t *eeprom, const char *part_name, uint8_t *buffer);
 
 /**
  * @brief Store the partiton to eeprom memory from buffer
@@ -36,7 +46,7 @@ int eeprom_load_partition(const eeprom_t *eeprom, const char *part_name, uint8_t
  *                 The buffer size must be equal or greater than the partiton size
  * @return 0 - on success, -1 - on error
  */
-int eeprom_store_partition(const eeprom_t *eeprom, const char *part_name, const uint8_t *buffer);
+eeprom_error_t eeprom_store_partition(const eeprom_t *eeprom, const char *part_name, const uint8_t *buffer);
 
 /**
  * @brief Erease the partion section and overwrite the conent with erease_symbol
@@ -45,6 +55,6 @@ int eeprom_store_partition(const eeprom_t *eeprom, const char *part_name, const 
  * @param erease_symbol - the symbol that overwrites the memory cells
  * @return 0 - on success, -1 - on error
  */
-int eeprom_erease_partition(const eeprom_t *eeprom, const char *part_name, uint8_t erease_symbol);
+eeprom_error_t eeprom_erease_partition(const eeprom_t *eeprom, const char *part_name, uint8_t erease_symbol);
 
 #endif
