@@ -35,7 +35,6 @@ bool check_factory_reset_trigger(void);
  */
 void idle_notifier(void);
 
-
 /**
  * @brief Reads device info from external storage.
  * @param device_info - device info partition structure

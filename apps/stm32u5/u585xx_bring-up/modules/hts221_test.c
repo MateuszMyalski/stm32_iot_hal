@@ -1,5 +1,5 @@
-#include "modules.h"
 #include "hal_i2c.h"
+#include "modules.h"
 
 static const uint8_t hts221_dev_addr = 0xBE;
 static const uint8_t hts221_who_am_i_reg = 0x0F;
