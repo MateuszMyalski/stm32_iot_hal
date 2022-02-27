@@ -12,3 +12,6 @@ out
 
 # Toolchain folder
 tools/toolchain/*
+
+# GDB server launching
+tools/cross-system-gdb/wsl/*
