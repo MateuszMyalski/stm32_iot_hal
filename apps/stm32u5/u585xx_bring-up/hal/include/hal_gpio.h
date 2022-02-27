@@ -1,5 +1,5 @@
-#ifndef GPIO_H
-#define GPIO_H
+#ifndef HAL_GPIO_H
+#define HAL_GPIO_H
 
 #include <stdbool.h>
 #include <stdint.h>

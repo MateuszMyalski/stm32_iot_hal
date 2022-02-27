@@ -1,5 +1,5 @@
-#ifndef I2C_H
-#define I2C_H
+#ifndef HAL_I2C_H
+#define HAL_I2C_H
 #include <stddef.h>
 #include "hal_common.h"
 
@@ -56,7 +56,27 @@ int hal_i2c_master_read(I2C_TypeDef *I2C, uint16_t dev_addr, uint8_t reg_addr, u
  */
 int hal_i2c_master_write(I2C_TypeDef *I2C, uint16_t dev_addr, uint8_t reg_addr, const uint8_t *data, size_t len);
 
+
+/**
+ * @brief Perform I2C Read to the 16-bits addressable memory
+ * @param I2C - CMSIS I2C instance
+ * @param dev_addr - Slave device address
+ * @param reg_addr - Slave's cell address
+ * @param data - Write data buffer
+ * @param len - Write data buffer length (in bytes)
+ * @return 0 - on success, -1 - on error
+ */
 int hal_i2c_memory_read(I2C_TypeDef *I2C, uint16_t dev_addr, uint16_t reg_addr, uint8_t *data, size_t len);
+
+/**
+ * @brief Perform I2C Read to the 16-bits addressable memory
+ * @param I2C - CMSIS I2C instance
+ * @param dev_addr - Slave device address
+ * @param reg_addr - Slave's cell address
+ * @param data - Write data buffer
+ * @param len - Write data buffer length (in bytes)
+ * @return 0 - on success, -1 - on error
+ */
 int hal_i2c_memory_write(I2C_TypeDef *I2C, uint16_t dev_addr, uint16_t reg_addr, const uint8_t *data, size_t len);
 
 #endif

@@ -13,7 +13,7 @@ void sdk_gpio_disable_AHB(GPIO_TypeDef *port) {
     uint32_t port_idx = (uint32_t)port - (uint32_t)GPIOA_BASE;
     port_idx /= GPIO_REG_SIZE;
 
-    SET_BIT(RCC->AHB2RSTR1, 1 << port_idx);
+    CLEAR_BIT(RCC->AHB2ENR1, 1 << port_idx);
 }
 
 inline void sdk_gpio_mode_digital_in(GPIO_TypeDef *port, uint32_t pin) {

@@ -7,6 +7,9 @@ extern volatile uint32_t SysTick_msTicks;
 
 #define DNF_OFF 0x00UL
 
+// Active pooling to minimalize the buffor time between memory writes
+#define MEMORY_WRITE_ACTIVE_POOLING
+
 static int master_mode_set_TIMINGR(I2C_TypeDef *I2C, I2C_speed_t I2C_speed) {
     if ((SystemCoreClock != 16000000) && (SystemCoreClock != 8000000)) {
         return 1;
@@ -48,12 +51,21 @@ static int i2c_master_mode_init(I2C_TypeDef *I2C, I2C_speed_t I2C_speed) {
     return 0;
 }
 
+static void i2c_reset_state(I2C_TypeDef *I2C) {
+    sdk_i2c_disable(I2C);
+    for (int i = 0; i < 3; i++) {
+        // When cleared, PE must be kept low for at least 3 APB clock cycles.
+        asm("nop");
+    }
+    sdk_i2c_enable(I2C);
+}
+
 int hal_i2c_open(I2C_TypeDef *I2C, I2C_mode_t I2C_mode, I2C_speed_t I2C_speed) {
     if (!IS_I2C_ALL_INSTANCE(I2C)) {
         return -1;
     }
 
-    sdk_i2c_enable_AHB(I2C);
+    sdk_i2c_enable_APB(I2C);
 
     switch (I2C_mode) {
         case I2C_mode_slave:
@@ -77,7 +89,7 @@ int hal_i2c_close(I2C_TypeDef *I2C) {
         return -1;
     }
 
-    sdk_i2c_disable_AHB(I2C);
+    sdk_i2c_disable_APB(I2C);
     sdk_i2c_disable(I2C);
 
     return 0;
@@ -194,6 +206,7 @@ int hal_i2c_memory_write(I2C_TypeDef *I2C, uint16_t dev_addr, uint16_t reg_addr,
         return 1;
     }
 
+retry:
     sdk_i2c_set_slave_addr(I2C, dev_addr);
     sdk_i2c_set_nbytes(I2C, len + sizeof(uint16_t));
     sdk_i2c_set_write_dir(I2C);
@@ -201,7 +214,12 @@ int hal_i2c_memory_write(I2C_TypeDef *I2C, uint16_t dev_addr, uint16_t reg_addr,
     sdk_i2c_send_start(I2C);
 
     if (sdk_i2c_read_nack(I2C)) {
+#ifdef MEMORY_WRITE_ACTIVE_POOLING
+        i2c_reset_state(I2C);
+        goto retry;
+#else
         return -1;
+#endif  // MEMORY_WRITE_ACTIVE_POOLING
     }
 
     // Perform sequentional write only on one page

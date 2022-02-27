@@ -6,6 +6,7 @@ PROJECT_PATH := $(APPS_PATH)/stm32u5/u585xx_bring-up
 
 INCLUDES := -I$(PROJECT_PATH)/system/include \
 			-I$(PROJECT_PATH)/bsp/include \
+			-I$(PROJECT_PATH)/modules/include \
 			-I$(CORE_PATH)/CMSIS
 
 CFLAGS   := -c \
@@ -43,52 +44,30 @@ SYSTEM_CFILES := system/handlers.c \
 
 BSP_CFILES := bsp/led.c \
 			  bsp/bsp_init.c \
-			  bsp/periphs.c
+			  bsp/periphs.c \
+			  bsp/extmem.c
+
+MODULES_CFILES = modules/hts221_test.c \
+				 modules/memory.c \
+				 modules/factory_reset.c \
+				 modules/led_notifier.c
 
 CFILES := main.c
 
-CFILES += ${SYSTEM_CFILES} ${BSP_CFILES}
+CFILES += ${SYSTEM_CFILES} \
+		  ${BSP_CFILES} \
+		  ${MODULES_CFILES}
 
 LIBS += $(OUT_LIB_PATH)/libhal.a \
-		$(OUT_LIB_PATH)/liblog.a
+		$(OUT_LIB_PATH)/liblogger.a \
+		$(OUT_LIB_PATH)/libextmem.a
 
+include $(PROJECT_PATH)/hal/Makefile
+include $(PROJECT_PATH)/logger/Makefile
+include $(PROJECT_PATH)/extmem/Makefile
 
 .PHONY: all
 all : $(TARGET).hex
-
-
-# HAL Library ------------------------
-LIBHAL_CFILES := hal/hal_gpio.c \
-				hal/hal_i2c.c
-
-SDK_CFILES := hal/sdk/sdk_gpio.c \
-            hal/sdk/sdk_i2c.c
-
-INCLUDES += -I$(PROJECT_PATH)/hal/include \
-			-I$(PROJECT_PATH)/hal/sdk/include
-
-LIBHAL_OBJS := $(patsubst %.c, $(OUT_OBJ_PATH)/%.o, $(LIBHAL_CFILES))
-SDK_OBJS := $(patsubst %.c, $(OUT_OBJ_PATH)/%.o, $(SDK_CFILES))
-
-$(OUT_LIB_PATH)/libhal.a: $(LIBHAL_OBJS) $(SDK_OBJS)
-	@echo "[Archiving:" $(notdir $@)"]"
-	@mkdir -p $(dir $@)
-	@$(AR) rcu $@ $^
-
-# ------------------------------------
-
-# Log Library ------------------------
-LIBLOG_CFILES     := logger/tiny_printf.c
-INCLUDES          += -I$(PROJECT_PATH)/logger/include
-
-LIBLOG_OBJS := $(patsubst %.c, $(OUT_OBJ_PATH)/%.o, $(LIBLOG_CFILES))
-
-$(OUT_LIB_PATH)/liblog.a: $(LIBLOG_OBJS)
-	@echo "[Archiving:" $(notdir $@)"]"
-	@mkdir -p $(dir $@)
-	@$(AR) rcu $@ $^
-
-# ------------------------------------
 
 include $(PROJECT_PATH)/Makefile.cfg
 

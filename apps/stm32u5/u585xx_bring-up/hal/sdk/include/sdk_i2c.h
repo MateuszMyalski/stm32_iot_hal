@@ -1,11 +1,11 @@
-#ifndef SDK_I2C_H
-#define SDK_I2C_H
+#ifndef HAL_SDK_I2C_H
+#define HAL_SDK_I2C_H
 #include <stdbool.h>
 #include "stm32u585xx.h"
 #include "stm32u5xx.h"
 
-void sdk_i2c_enable_AHB(I2C_TypeDef *I2C);
-void sdk_i2c_disable_AHB(I2C_TypeDef *I2C);
+void sdk_i2c_enable_APB(I2C_TypeDef *I2C);
+void sdk_i2c_disable_APB(I2C_TypeDef *I2C);
 
 void sdk_i2c_set_clock(I2C_TypeDef *I2C, uint32_t speed, uint32_t sys_core);
 
