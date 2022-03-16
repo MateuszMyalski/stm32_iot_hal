@@ -8,3 +8,11 @@ DerivePointerAlignment: true
 PointerAlignment: Left
 
 AllowShortFunctionsOnASingleLine: Empty
+
+AlignConsecutiveMacros: true
+AlignConsecutiveAssignments: true
+
+AlignTrailingComments: true
+
+AllowAllArgumentsOnNextLine: true
+

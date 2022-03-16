@@ -10,8 +10,5 @@ out
 # Misc. files
 *.log
 
-# Toolchain folder
-tools/toolchain/*
-
-# GDB server launching
-tools/cross-system-gdb/wsl/*
+# Env setup
+env.cfg

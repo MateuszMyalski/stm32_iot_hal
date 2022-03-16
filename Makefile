@@ -1,61 +1,52 @@
 # -*- MakeFile -*-
 
-# TOOLCHAIN CONFIGURATION
-TOOLCHAIN_PATH := $(CURDIR)/tools/toolchain/gcc-arm-none-eabi/bin
-ARM_NONE_EABI_PREFIX := $(TOOLCHAIN_PATH)/arm-none-eabi
+# Toolchain configuration -----------------------
+ENV_CFG_PATH := $(CURDIR)/env.cfg
 
-AS   := $(ARM_NONE_EABI_PREFIX)-as
-CC   := $(ARM_NONE_EABI_PREFIX)-gcc
-CCX  := $(ARM_NONE_EABI_PREFIX)-g++
-AR   := $(ARM_NONE_EABI_PREFIX)-ar
-LD   := $(ARM_NONE_EABI_PREFIX)-ld
-OC   := $(ARM_NONE_EABI_PREFIX)-objcopy
-OD   := $(ARM_NONE_EABI_PREFIX)-objdump
-OS   := $(ARM_NONE_EABI_PREFIX)-size
+ifneq ($(shell test -e $(ENV_CFG_PATH) && echo -n yes),yes)
+	$(error "Project not configured! Run ./tools/envsetup.sh")
+endif
 
-# DIRECTORIES
-OUT_PATH := $(CURDIR)/out
-OUT_OBJ_PATH := $(OUT_PATH)/obj
-OUT_LIB_PATH := $(OUT_PATH)/lib
+include $(ENV_CFG_PATH)
 
-APPS_PATH := $(CURDIR)/apps
-LINK_PATH := $(CURDIR)/link
-CORE_PATH := $(CURDIR)/core
-LIB_PATH  := $(CURDIR)/lib
+ARM_NONE_EABI_PREFIX := $(TOOLCHAIN_BIN_PATH)/arm-none-eabi
 
-# INIT TARGET FLAGS
-LDSCRIPT := $(NULL)
-CPPFLAGS := $(NULL)
-CFLAGS   := $(NULL)
-LFLAGS   := $(NULL)
-INCLUDES := $(NULL)
-CFILES   := $(NULL)
-SFLAGS   := $(NULL)
-SFILES   := $(NULL)
-OBJS     := $(NULL)
-LIBS     := $(NULL)
+AS    := $(ARM_NONE_EABI_PREFIX)-as
+CC    := $(ARM_NONE_EABI_PREFIX)-gcc
+CXX   := $(ARM_NONE_EABI_PREFIX)-g++
+AR    := $(ARM_NONE_EABI_PREFIX)-ar
+LD    := $(ARM_NONE_EABI_PREFIX)-ld
+OC    := $(ARM_NONE_EABI_PREFIX)-objcopy
+OD    := $(ARM_NONE_EABI_PREFIX)-objdump
+OS    := $(ARM_NONE_EABI_PREFIX)-size
 
-# HELPER RECIPS
+QUIET := @
+ECHO  := echo
+MKDIR := mkdir -p
+
+# Main directories ------------------------------
+OUT_PATH        := $(CURDIR)/out
+APPS_PATH       := $(CURDIR)/app
+MIDDLEWARE_PATH := $(CURDIR)/middleware
+SDK_PATH        := $(CURDIR)/sdk
+
+# Select target ---------------------------------
+include $(APPS_PATH)/$(APP_NAME)/module.mk
+
 .PHONY: info
 info:
-	@echo
-	@echo "---[VARIABLES]---"
-	@echo "[TOOLCHAIN]:" $(ARM_NONE_EABI_PREFIX)
-	@echo "[TARGET NAME]:" $(TARGET)
-	@echo "[L FLAGS]:" $(LFLAGS)
-	@echo "[S FLAGS]:" $(SFLAGS)
-	@echo "[C FLAGS]:" $(CFLAGS)
-	@echo "[CPP FLAGS]:" $(CPPFLAGS)
-	@echo "[LINKER SCRIPT]:" $(LDSCRIPT)
-	@echo "[LIBS]:" $(LIBS)
-	@echo "-----------------"
-	@echo
+	$(QUIET)$(ECHO)
+	$(QUIET)$(ECHO) "---[Build set]---"
+	$(QUIET)$(ECHO) "[TOOLCHAIN]:" $(TOOLCHAIN_BIN_PATH)
+	$(QUIET)$(ECHO) "[TARGET NAME]:" $(TARGET)
+	$(QUIET)$(ECHO) "[APP NAME]:" $(APP_NAME)
+	$(QUIET)$(ECHO) "-----------------"
+	$(QUIET)$(ECHO)
 
 .PHONY: clean
 clean:
-	@echo "[Cleaning up the project]"
+	$(QUIET)$(ECHO) "[Cleaning up the project]"
 	rm -rf $(OUT_PATH)
 
-# SELECT TARGET
-# TODO(Mateusz) Currently hardcoded stm32u5 target
-include $(APPS_PATH)/stm32u5/u585xx_bring-up/Makefile.target
+.PHONY: all
+all: $(TARGET).hex
