@@ -4,4 +4,6 @@
 #include "stm32u585xx.h"
 #include "stm32u5xx.h"
 
+#include <stdbool.h>
+
 #endif
