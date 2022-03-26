@@ -10,7 +10,7 @@ int main() {
     bsp_init();
     init_ee_storage();
 
-    LOG_INFO("Build: " BUILD_USER "\r\n");
+    LOG_INFO("GERRIT TEST");
 
     if (factory_reset_check_trigger()) {
         LOG_WARN("Factory reset triggered!\r\n");
