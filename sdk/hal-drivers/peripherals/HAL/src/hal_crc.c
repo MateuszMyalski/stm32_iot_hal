@@ -34,11 +34,11 @@ hal_err_t hal_crc_ioctl(CRC_ioctl_t CRC_ioctl) {
             break;
 
         case CRC_ioctl_out_reversed:
-            ll_crc_set_out_reversed(false);
+            ll_crc_set_out_reversed(true);
             break;
 
         case CRC_ioctl_out_no_reversed:
-            ll_crc_set_out_reversed(true);
+            ll_crc_set_out_reversed(false);
             break;
 
         case CRC_ioctl_in_no_reversed:
@@ -55,7 +55,6 @@ hal_err_t hal_crc_ioctl(CRC_ioctl_t CRC_ioctl) {
 
         case CRC_ioctl_in_word_reversed:
             ll_crc_in_order_rev_by_word();
-            return HAL_NO_ERR;
             break;
 
         case CRC_ioctl_poly_crc16citt:
@@ -101,12 +100,32 @@ hal_err_t hal_crc_ioctl(CRC_ioctl_t CRC_ioctl) {
     return HAL_ERR_PARAMS;
 }
 
-hal_err_t hal_crc_write(uint32_t data_in) {
-    ll_crc_write_data_reg(data_in);
+hal_err_t hal_crc_write(const uint8_t* data_in, size_t size) {
+    if ((NULL == data_in) || (size < 0)) {
+        return HAL_ERR_PARAMS;
+    }
+
+    size_t n_words = size / sizeof(uint32_t);
+    for (size_t i = 0; i < n_words; i++) {
+        uint8_t* v4  = data_in + i * sizeof(uint32_t);
+        uint32_t i32 = v4[3] | (v4[2] << 8) | (v4[1] << 16) | (v4[0] << 24);
+        ll_crc_write_data_reg(i32);
+    }
+
+    size_t n_bytes = size - (n_words * sizeof(uint32_t));
+    if (0 < n_bytes) {
+        uint32_t i32 = 0x0;
+        uint8_t* v4  = data_in + n_words * sizeof(uint32_t);
+        for (size_t i = 0; i < n_bytes; i++) {
+            i32 |= v4[i] << (8 * i);
+        }
+        ll_crc_write_data_reg(i32);
+    }
+
     return HAL_NO_ERR;
 }
 
-hal_err_t hal_crc_read(uint32_t *value_out) {
+hal_err_t hal_crc_read(uint32_t* value_out) {
     if (value_out == NULL) {
         return HAL_ERR_PARAMS;
     }

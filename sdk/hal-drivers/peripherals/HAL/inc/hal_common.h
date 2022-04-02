@@ -1,6 +1,8 @@
 #ifndef HAL_COMMON_H
 #define HAL_COMMON_H
 
+#include <stddef.h>
+
 #include "stm32u585xx.h"
 #include "stm32u5xx.h"
 

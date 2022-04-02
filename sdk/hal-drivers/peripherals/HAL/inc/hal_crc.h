@@ -50,7 +50,7 @@ hal_err_t hal_crc_ioctl(CRC_ioctl_t CRC_ioctl);
  * @param data_in - value to update the CRC
  * @return HAL Error code. 0 - Success
  */
-hal_err_t hal_crc_write(uint32_t data_in);
+hal_err_t hal_crc_write(const uint8_t* data_in, size_t size);
 
 /**
  * @brief Read value of calculated crc and resets the calculation

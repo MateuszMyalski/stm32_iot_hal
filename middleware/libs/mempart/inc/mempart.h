@@ -22,6 +22,7 @@ typedef int (*tx_data_cb_t)(uint16_t mem_addr, const uint8_t *data, size_t size)
 typedef int (*rx_data_cb_t)(uint16_t mem_addr, uint8_t *data, size_t size);
 typedef int (*decrypt_cb_t)(const partition_entry_t *partiton_name, uint8_t *data);
 typedef int (*encrypt_cb_t)(const partition_entry_t *partiton_name, uint8_t *data);
+typedef uint32_t (*crc_cb_t)(const partition_entry_t *partition_name, const uint8_t *data, size_t size);
 
 typedef struct {
     device_t device;
@@ -29,6 +30,7 @@ typedef struct {
     rx_data_cb_t rx_data_cb;
     decrypt_cb_t decrypt_cb;
     encrypt_cb_t encrypt_cb;
+    crc_cb_t crc_cb;
     const partition_entry_t *partition_table;
     size_t partition_table_size;
 } mempart_memory_t;
@@ -50,6 +52,7 @@ mempart_err_t mempart_load(const mempart_memory_t *memory, const char *part_name
  * @param buffer - buffer of the partition data that is going to be stored
  *                 The buffer size must be equal or greater than the partiton size.
  *                 Encryption is going to be perfomed on the buffer.
+ *                 CRC calculation will be copied into the buffer.
  * @return mempart error code. 0 - Success
  */
 mempart_err_t mempart_store(const mempart_memory_t *memory, const char *part_name, uint8_t *buffer);

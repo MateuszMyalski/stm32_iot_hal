@@ -28,16 +28,16 @@ typedef struct __attribute__((packed, aligned(1))) {
     uint16_t major_imgA_version;
     uint16_t minor_imgB_version;
     uint16_t major_imgB_version;
-    uint8_t _reserved[36];
-    uint64_t crc32;
+    uint8_t _reserved[40];
+    uint32_t crc32;
 } part_device_info_t;
 
 typedef struct __attribute__((packed, aligned(1))) {
     uint8_t magic[EEPROM_PART_MAGIC_SIZE];
     uint32_t invalid_boot_A;
     uint32_t invalid_boot_B;
-    uint8_t _reserved[40];
-    uint64_t crc32;
+    uint8_t _reserved[44];
+    uint32_t crc32;
 } part_cnt_invalid_boot_t;
 
 typedef struct __attribute__((packed, aligned(1))) {
@@ -48,24 +48,24 @@ typedef struct __attribute__((packed, aligned(1))) {
     uint32_t error_flag_bl;
     uint32_t error_flag_imgA;
     uint32_t error_flag_imgB;
-    uint8_t _reserved[24];
-    uint64_t crc32;
+    uint8_t _reserved[28];
+    uint32_t crc32;
 } part_boot_config_t;
 
 typedef struct __attribute__((packed, aligned(1))) {
     uint8_t magic[EEPROM_PART_MAGIC_SIZE];
     uint8_t SSID[32];
     uint8_t password[32];
-    uint8_t _reserved[48];
-    uint64_t crc32;
+    uint8_t _reserved[52];
+    uint32_t crc32;
 } part_wifi_creds_A_t;
 
 typedef struct __attribute__((packed, aligned(1))) {
     uint8_t magic[EEPROM_PART_MAGIC_SIZE];
     uint8_t SSID[32];
     uint8_t password[32];
-    uint8_t _reserved[48];
-    uint64_t crc32;
+    uint8_t _reserved[52];
+    uint32_t crc32;
 } part_wifi_creds_B_t;
 
 #define EEPROM_PART_DEVICE_INFO_MAGIC \

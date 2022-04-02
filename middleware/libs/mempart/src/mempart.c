@@ -7,8 +7,6 @@
 #include "crc32.h"
 #include "partmng.h"
 
-#define CRC_INIT_VALUE 0xFFFFFFFFUL
-
 static bool is_magic_valid(const partition_entry_t *partition, const uint8_t *partion_buffer) {
     if ((partition->magic_size <= 0) || (partition->magic_size > MAX_PARTITON_NAME_SIZE)) {
         // Problem with partition magic size initialization
@@ -35,14 +33,13 @@ mempart_err_t mempart_load(const mempart_memory_t *mempart_memory, const char *p
     }
 
     /* Read partition */
-    mempart_err_t err = MEMPART_NO_ERR;
-    err               = mempart_memory->rx_data_cb(partition->begin_address, buffer, partition->length);
+    mempart_err_t err = mempart_memory->rx_data_cb(partition->begin_address, buffer, partition->length);
     if (err) {
         return MEMPART_ERR_RX;
     }
 
     /* Decrypt the partiton */
-    if (!(partition->flags & PARTITION_FLAG_ENCRYPTED)) {
+    if (partition->flags & PARTITION_FLAG_ENCRYPTED) {
         if (NULL == mempart_memory->decrypt_cb) {
             return MEMPART_ERR_DECRYPTION;
         }
@@ -62,11 +59,10 @@ mempart_err_t mempart_load(const mempart_memory_t *mempart_memory, const char *p
 
     /* Check CRC */
     if (partition->flags & PARTITION_FLAG_USE_CRC) {
-        return 0;
-        uint16_t buffer_size_to_crc = partition->length - sizeof(uint64_t);
-        uint64_t calc_crc           = crc32(buffer, buffer_size_to_crc, CRC_INIT_VALUE);
-        uint64_t part_crc           = 0x0;
-        memcpy(&part_crc, &buffer[buffer_size_to_crc], sizeof(uint64_t));
+        uint16_t buffer_size_to_crc = partition->length - sizeof(uint32_t);
+        uint32_t calc_crc           = mempart_memory->crc_cb(partition, buffer, buffer_size_to_crc);
+        uint32_t part_crc           = 0x0;
+        memcpy(&part_crc, &buffer[buffer_size_to_crc], sizeof(uint32_t));
 
         if (calc_crc != part_crc) {
             return MEMPART_ERR_CRC;
@@ -103,19 +99,17 @@ mempart_err_t mempart_store(const mempart_memory_t *mempart_memory, const char *
 
     /* Compute CRC */
     if (partition->flags & PARTITION_FLAG_USE_CRC) {
-        uint16_t buffer_no_crc_length = partition->length - sizeof(uint64_t);
-        uint16_t part_crc_addr        = partition->begin_address + buffer_no_crc_length;
-        uint64_t calc_crc             = crc32(buffer, buffer_no_crc_length, CRC_INIT_VALUE);
+        uint32_t buffer_no_crc_length = partition->length - sizeof(uint32_t);
+        uint32_t calc_crc             = mempart_memory->crc_cb(partition, buffer, buffer_no_crc_length);
+        memcpy(&buffer[buffer_no_crc_length], &calc_crc, sizeof(uint32_t));
 
-        // Send just CRC to not edit the source buffer
-        err = mempart_memory->tx_data_cb(part_crc_addr, (const uint8_t *)&calc_crc, sizeof(uint64_t));
         if (err) {
             return MEMPART_ERR_CRC;
         }
     }
 
     /* Encrypt the partiton */
-    if (!(partition->flags & PARTITION_FLAG_ENCRYPTED)) {
+    if (partition->flags & PARTITION_FLAG_ENCRYPTED) {
         if (NULL == mempart_memory->encrypt_cb) {
             return MEMPART_ERR_ENCRYPTION;
         }
@@ -159,8 +153,7 @@ mempart_err_t mempart_erease(const mempart_memory_t *mempart_memory, const char 
 
     memset(empty_buffer, erease_symbol, partition->length * sizeof(uint8_t));
 
-    mempart_err_t err = MEMPART_NO_ERR;
-    err               = mempart_memory->tx_data_cb(partition->begin_address, empty_buffer, partition->length);
+    mempart_err_t err = mempart_memory->tx_data_cb(partition->begin_address, empty_buffer, partition->length);
     if (err) {
         free(empty_buffer);
         return MEMPART_ERR_TX;

@@ -1,7 +1,9 @@
 #include "ee_storage.h"
 
 #include "bsp.h"
+#include "crc32.h"
 #include "delay.h"
+#include "hal_crc.h"
 #include "hal_i2c.h"
 #include "led_notifier.h"
 #include "partmng.h"
@@ -110,32 +112,58 @@ static int eeprom_rx_data(uint16_t mem_addr, uint8_t *data, size_t size) {
     return err;
 }
 
-static int decrypt(const partition_entry_t *partiton_name, uint8_t *data) {
+static int eeprom_decrypt(const partition_entry_t *partiton_name, uint8_t *data) {
     return 0;
 }
 
-static int encrypt(const partition_entry_t *partiton_name, uint8_t *data) {
+static int eeprom_encrypt(const partition_entry_t *partiton_name, uint8_t *data) {
     return 0;
+}
+
+static uint32_t eeprom_crc(const partition_entry_t *partition_name, const uint8_t *data, size_t size) {
+    uint32_t crc = 0x0;
+#ifdef USE_HW_ACCELERATED_CRC
+    hal_crc_open();
+
+    hal_crc_poly_init(0xFFFFFFFF);
+    hal_crc_ioctl(CRC_ioctl_in_byte_reversed);
+    hal_crc_ioctl(CRC_ioctl_out_reversed);
+    hal_crc_ioctl(CRC_ioctl_poly_crc32);
+
+    hal_crc_write(data, size);
+    hal_crc_read(&crc);
+    hal_crc_close();
+
+#else
+    crc32_ctx_t crc_ctx = {.polynomial      = 0x04C11DB7,
+                           .init_polynomial = 0xFFFFFFFF,
+                           .in_reversed     = CRC32_IN_BYTE_REVERSE,
+                           .out_reversed    = true};
+    crc = crc32(&crc_ctx, data, size);
+
+#endif
+    return ~crc;
 }
 
 int init_ee_storage(void) {
     eeprom_err_t err = EEPROM_NO_ERR;
 
     err = eeprom_init(&eeprom_ctx, BSP_EEPROM_ADDR, BSP_EEPROM_I2C, (uint32_t *)&SysTick_msTicks);
-    if(EEPROM_NO_ERR != err) {
+    if (EEPROM_NO_ERR != err) {
         led_notifier_error_blink();
     }
 
     err = eeprom_set_timeout(&eeprom_ctx, 100);
-    if(EEPROM_NO_ERR != err) {
+    if (EEPROM_NO_ERR != err) {
         led_notifier_error_blink();
     }
 
     mempart_memory.device               = M24256_D;
     mempart_memory.tx_data_cb           = eeprom_tx_data;
     mempart_memory.rx_data_cb           = eeprom_rx_data;
-    mempart_memory.decrypt_cb           = decrypt;
-    mempart_memory.encrypt_cb           = encrypt;
+    mempart_memory.decrypt_cb           = eeprom_decrypt;
+    mempart_memory.encrypt_cb           = eeprom_encrypt;
+    mempart_memory.crc_cb               = eeprom_crc;
     mempart_memory.partition_table      = eeprom_part_table;
     mempart_memory.partition_table_size = sizeof(eeprom_part_table) / sizeof(*eeprom_part_table);
 
