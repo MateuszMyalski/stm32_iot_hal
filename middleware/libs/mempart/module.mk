@@ -7,8 +7,6 @@ LIB_MEMPART            := $(LIB_MEMPART_OUT_PATH)/libmempart.a
 LIBS     += $(LIB_MEMPART)
 INCLUDES += -I$(MODULE_DIR_LIB_MEMPART)inc
 
-include $(MIDDLEWARE_PATH)/libs/crc/module.mk
-
 $(LIB_MEMPART) : CFILES :=  $(MODULE_DIR_LIB_MEMPART)src/mempart.c \
 							$(MODULE_DIR_LIB_MEMPART)src/partmng.c
 $(LIB_MEMPART) : OBJS   := $(patsubst $(MODULE_DIR_LIB_MEMPART)src/%.c, $(LIB_MEMPART_OUT_PATH)/%.o, $(CFILES))
