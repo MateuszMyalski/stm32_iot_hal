@@ -1,7 +1,5 @@
 #include "hal_crc.h"
 
-#include <stddef.h>
-
 #include "ll_crc.h"
 
 hal_err_t hal_crc_open(CRC_TypeDef* ctx) {
