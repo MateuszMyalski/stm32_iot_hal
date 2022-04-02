@@ -99,7 +99,7 @@ mempart_err_t mempart_store(const mempart_memory_t *mempart_memory, const char *
 
     /* Compute CRC */
     if (partition->flags & PARTITION_FLAG_USE_CRC) {
-        uint32_t buffer_no_crc_length = partition->length - sizeof(uint32_t);
+        uint16_t buffer_no_crc_length = partition->length - sizeof(uint32_t);
         uint32_t calc_crc             = mempart_memory->crc_cb(partition, buffer, buffer_no_crc_length);
         memcpy(&buffer[buffer_no_crc_length], &calc_crc, sizeof(uint32_t));
 
