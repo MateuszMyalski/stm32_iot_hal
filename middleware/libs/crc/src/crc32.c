@@ -52,7 +52,7 @@ static uint32_t calculate_crc32(uint32_t init, uint32_t data, uint32_t polynomia
     return crc;
 }
 
-inline static uint32_t convert_to_little_big_endian(const uint8_t *in) {
+inline static uint32_t byte_swap32(const uint8_t *in) {
     return in[3] | (in[2] << 8) | (in[1] << 16) | (in[0] << 24);
 }
 
@@ -64,20 +64,20 @@ inline static uint32_t align_to_word(const uint8_t *in, int size) {
     return out;
 }
 
-uint32_t crc32(const crc32_ctx_t *ctx, const uint8_t *data, size_t size) {
-    if ((NULL == ctx) || (NULL == data) || (0 > size)) {
+uint32_t crc32(const crc32_ctx_t *ctx, const uint8_t *data_in, size_t size) {
+    if ((NULL == ctx) || (NULL == data_in) || (0 > size)) {
         return 0xFFFFFFFF;
     }
 
-    uint32_t crc = ctx->init_polynomial;
+    uint32_t crc = ctx->init_crc;
 
     /* Calculate how many even words contain the array (floor the division) */
     size_t n_words = size / sizeof(uint32_t);
 
     /* Calculate CRC of even 32bit-words */
     for (size_t i = 0; i < (n_words * sizeof(uint32_t)); i += sizeof(uint32_t)) {
-        const uint8_t *aligned_word = data + i;
-        uint32_t data               = convert_to_little_big_endian(aligned_word);
+        const uint8_t *aligned_word = data_in + i;
+        uint32_t data               = byte_swap32(aligned_word);
 
         crc = calculate_crc32(crc, data, ctx->polynomial, ctx->in_reversed);
     }
@@ -85,8 +85,8 @@ uint32_t crc32(const crc32_ctx_t *ctx, const uint8_t *data, size_t size) {
     /* Calculate last not aligned bytes */
     size_t n_bytes = size - (n_words * sizeof(uint32_t));
     if (0 < n_bytes) {
-        const uint8_t *no_aligned_word = data + n_words * sizeof(uint32_t);
-        uint32_t data                  = align_to_word(no_aligned_word, n_bytes);
+        const uint8_t *not_aligned_word = data_in + n_words * sizeof(uint32_t);
+        uint32_t data                   = align_to_word(not_aligned_word, n_bytes);
 
         crc = calculate_crc32(crc, data, ctx->polynomial, ctx->in_reversed);
     }

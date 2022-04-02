@@ -4,61 +4,81 @@
 #include "hal_common.h"
 
 typedef enum {
-    CRC_ioctl_poly_size_7bit,
-    CRC_ioctl_poly_size_8bit,
-    CRC_ioctl_poly_size_16bit,
-    CRC_ioctl_poly_size_32bit,
-    CRC_ioctl_out_reversed,
-    CRC_ioctl_out_no_reversed,
-    CRC_ioctl_in_no_reversed,
-    CRC_ioctl_in_byte_reversed,
-    CRC_ioctl_in_half_word_reversed,
-    CRC_ioctl_in_word_reversed,
-    CRC_ioctl_poly_crc16citt,
-    CRC_ioctl_poly_crc16ibm,
-    CRC_ioctl_poly_crc16t10dif,
-    CRC_ioctl_poly_crc16dnp,
-    CRC_ioctl_poly_crc16dect,
-    CRC_ioctl_poly_crc32,
-    CRC_ioctl_poly_crc32c,
-    CRC_ioctl_poly_crc32k,
-    CRC_ioctl_poly_crc32q
-    
+    /* [NULL] Sets the polynomial size to 8 bits. */
+    CRC_IOCTL_POLY_SIZE_7BIT,
+
+    /* [NULL] Sets the polynomial size to 8 bits. */
+    CRC_IOCTL_POLY_SIZE_8BIT,
+
+    /* [NULL] Sets the polynomial size to 16 bits. */
+    CRC_IOCTL_POLY_SIZE_16BIT,
+
+    /* [NULL] Sets the polynomial size to 32 bits. */
+    CRC_IOCTL_POLY_SIZE_32BIT,
+
+    /* [NULL] Reverse output on bit level. */
+    CRC_IOCTL_OUT_REVERSED,
+
+    /* [NULL]  Do not reverse the output. */
+    CRC_IOCTL_OUT_NO_REVERSED,
+
+    /* [NULL] Do not reverse the input. */
+    CRC_IOCTL_IN_NO_REVERSED,
+
+    /* [NULL] Reverse the input by byte. */
+    CRC_IOCTL_IN_BYTE_REVERSED,
+
+    /* [NULL] Reverse the input by hald word. */
+    CRC_IOCTL_IN_HALF_WORD_REVERSED,
+
+    /* [NULL] Reverse the input by word. */
+    CRC_IOCTL_IN_WORD_REVERSED,
+
+    /* [uint32_t] Set polynomial, default: 0x04C11DB7. */
+    CRC_IOCTL_SET_POLY,
+
+    /* [uint32_t] Set initliazliation vector default 0xFFFFFFFF. */
+    CRC_IOCTL_INIT_CRC
 } CRC_ioctl_t;
 
 /**
- * @brief Enables the AHB
- * @return HAL Error code. 0 - Success
+ * @brief Prepare for starting operation on the CRC peripherial
+ * @param ctx [in] CMSIS CRC handler
+ * @return HAL Error code
  */
-hal_err_t hal_crc_open();
+hal_err_t hal_crc_open(CRC_TypeDef* ctx);
 
 /**
- * @brief Resets the AHB bus
- * @return HAL Error code. 0 - Success
+ * @brief Disable the CRC peripheral
+ * @param ctx [in] CMSIS CRC handler
+ * @return HAL Error code
  */
-hal_err_t hal_crc_close();
+hal_err_t hal_crc_close(CRC_TypeDef* ctx);
 
 /**
  * @brief Sets mode/type
- * @param gpio_ioctl - enumaration of function to set
- * @return HAL Error code. 0 - Success
+ * @param ctx  [in]      CMSIS CRC handler
+ * @param cmd  [in]      ioctl cmd enumeration
+ * @param args [in/out]  arg defined command
+ * @return HAL Error code
  */
-hal_err_t hal_crc_ioctl(CRC_ioctl_t CRC_ioctl);
+hal_err_t hal_crc_ioctl(CRC_TypeDef* ctx, CRC_ioctl_t cmd, void* args);
 
 /**
- * @brief Add data to update the crc
- * @param data_in - value to update the CRC
- * @return HAL Error code. 0 - Success
+ * @brief Adds data and update the CRC state
+ * @param ctx     [in] CMSIS CRC handler
+ * @param data_in [in] value to update the CRC
+ * @param size    [in] size of the input data
+ * @return HAL Error code
  */
-hal_err_t hal_crc_write(const uint8_t* data_in, size_t size);
+hal_err_t hal_crc_write(CRC_TypeDef* ctx, const uint8_t* data_in, size_t size);
 
 /**
- * @brief Read value of calculated crc and resets the calculation
- * @param value_out - calculated crc
- * @return 0/1 - Digital value present on selected pin
+ * @brief Read value of calculated crc and reset the CRC state
+ * @param ctx       [in]  CMSIS CRC handler
+ * @param value_out [out] calculated crc
+ * @return HAL Error code
  */
-hal_err_t hal_crc_read(uint32_t *value_out);
-
-hal_err_t hal_crc_poly_init(uint32_t data);
+hal_err_t hal_crc_read(CRC_TypeDef* ctx, uint32_t* value_out);
 
 #endif

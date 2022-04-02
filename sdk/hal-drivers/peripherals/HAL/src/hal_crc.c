@@ -4,140 +4,141 @@
 
 #include "ll_crc.h"
 
-hal_err_t hal_crc_open() {
-    ll_crc_enable_AHB();
-    ll_crc_reset();
+hal_err_t hal_crc_open(CRC_TypeDef* ctx) {
+    if (NULL == ctx) {
+        return HAL_ERR_PARAMS;
+    }
+
+    ll_crc_enable_AHB(ctx);
+    ll_crc_reset(ctx);
+
     return HAL_NO_ERR;
 }
 
-hal_err_t hal_crc_close() {
-    ll_crc_disable_AHB();
+hal_err_t hal_crc_close(CRC_TypeDef* ctx) {
+    if (NULL == ctx) {
+        return HAL_ERR_PARAMS;
+    }
+
+    ll_crc_disable_AHB(ctx);
     return HAL_NO_ERR;
 }
 
-hal_err_t hal_crc_ioctl(CRC_ioctl_t CRC_ioctl) {
-    switch (CRC_ioctl) {
-        case CRC_ioctl_poly_size_7bit:
-            ll_crc_set_poly_size_7bit();
+hal_err_t hal_crc_ioctl(CRC_TypeDef* ctx, CRC_ioctl_t cmd, void* args) {
+    if (NULL == ctx) {
+        return HAL_ERR_PARAMS;
+    }
+
+    switch (cmd) {
+        case CRC_IOCTL_POLY_SIZE_7BIT:
+            ll_crc_set_poly_size_7bit(ctx);
             break;
 
-        case CRC_ioctl_poly_size_8bit:
-            ll_crc_set_poly_size_8bit();
+        case CRC_IOCTL_POLY_SIZE_8BIT:
+            ll_crc_set_poly_size_8bit(ctx);
             break;
 
-        case CRC_ioctl_poly_size_16bit:
-            ll_crc_set_poly_size_16bit();
+        case CRC_IOCTL_POLY_SIZE_16BIT:
+            ll_crc_set_poly_size_16bit(ctx);
             break;
 
-        case CRC_ioctl_poly_size_32bit:
-            ll_crc_set_poly_size_32bit();
+        case CRC_IOCTL_POLY_SIZE_32BIT:
+            ll_crc_set_poly_size_32bit(ctx);
             break;
 
-        case CRC_ioctl_out_reversed:
-            ll_crc_set_out_reversed(true);
+        case CRC_IOCTL_OUT_REVERSED:
+            ll_crc_set_out_reversed(ctx, true);
             break;
 
-        case CRC_ioctl_out_no_reversed:
-            ll_crc_set_out_reversed(false);
+        case CRC_IOCTL_OUT_NO_REVERSED:
+            ll_crc_set_out_reversed(ctx, false);
             break;
 
-        case CRC_ioctl_in_no_reversed:
-            ll_crc_in_order_no_change();
+        case CRC_IOCTL_IN_NO_REVERSED:
+            ll_crc_in_order_no_change(ctx);
             break;
 
-        case CRC_ioctl_in_byte_reversed:
-            ll_crc_in_order_rev_by_byte();
+        case CRC_IOCTL_IN_BYTE_REVERSED:
+            ll_crc_in_order_rev_by_byte(ctx);
             break;
 
-        case CRC_ioctl_in_half_word_reversed:
-            ll_crc_in_order_rev_by_half_word();
+        case CRC_IOCTL_IN_HALF_WORD_REVERSED:
+            ll_crc_in_order_rev_by_half_word(ctx);
             break;
 
-        case CRC_ioctl_in_word_reversed:
-            ll_crc_in_order_rev_by_word();
+        case CRC_IOCTL_IN_WORD_REVERSED:
+            ll_crc_in_order_rev_by_word(ctx);
             break;
 
-        case CRC_ioctl_poly_crc16citt:
-            ll_crc_set_poly(0x1021);
+        case CRC_IOCTL_SET_POLY:
+            if (NULL == args) {
+                return HAL_ERR_PARAMS;
+            }
+            ll_crc_set_poly(ctx, *(uint32_t*)args);
             break;
 
-        case CRC_ioctl_poly_crc16ibm:
-            ll_crc_set_poly(0x8005);
-            break;
-
-        case CRC_ioctl_poly_crc16t10dif:
-            ll_crc_set_poly(0x8BB7);
-            break;
-
-        case CRC_ioctl_poly_crc16dnp:
-            ll_crc_set_poly(0x3D65);
-            break;
-
-        case CRC_ioctl_poly_crc16dect:
-            ll_crc_set_poly(0x0589);
-            break;
-
-        case CRC_ioctl_poly_crc32:
-            ll_crc_set_poly(0x04C11DB7);
-            break;
-
-        case CRC_ioctl_poly_crc32c:
-            ll_crc_set_poly(0x1EDC6F41);
-            break;
-
-        case CRC_ioctl_poly_crc32k:
-            ll_crc_set_poly(0x741B8CD7);
-            break;
-
-        case CRC_ioctl_poly_crc32q:
-            ll_crc_set_poly(0x814141AB);
+        case CRC_IOCTL_INIT_CRC:
+            if (NULL == args) {
+                return HAL_ERR_PARAMS;
+            }
+            ll_crc_init_crc(ctx, *(uint32_t*)args);
             break;
 
         default:
             return HAL_ERR_PARAMS;
             break;
     }
-    return HAL_ERR_PARAMS;
+
+    return HAL_NO_ERR;
 }
 
-hal_err_t hal_crc_write(const uint8_t* data_in, size_t size) {
+inline static uint32_t byte_swap32(const uint8_t* in) {
+    return in[3] | (in[2] << 8) | (in[1] << 16) | (in[0] << 24);
+}
+
+inline static uint32_t align_to_word(const uint8_t* in, int size) {
+    uint32_t out = 0x0;
+    for (int i = 0; i < size; i++) {
+        out |= in[i] << (8 * i);
+    }
+    return out;
+}
+
+hal_err_t hal_crc_write(CRC_TypeDef* ctx, const uint8_t* data_in, size_t size) {
     if ((NULL == data_in) || (size < 0)) {
         return HAL_ERR_PARAMS;
     }
 
+    /* Calculate how many even words contain the array (floor the division) */
     size_t n_words = size / sizeof(uint32_t);
-    for (size_t i = 0; i < n_words; i++) {
-        uint8_t* v4  = data_in + i * sizeof(uint32_t);
-        uint32_t i32 = v4[3] | (v4[2] << 8) | (v4[1] << 16) | (v4[0] << 24);
-        ll_crc_write_data_reg(i32);
+
+    /* Calculate CRC of even 32bit-words */
+    for (size_t i = 0; i < (n_words * sizeof(uint32_t)); i += sizeof(uint32_t)) {
+        const uint8_t* aligned_word = data_in + i;
+        uint32_t data               = byte_swap32(aligned_word);
+
+        ll_crc_write_data_reg(ctx, data);
     }
 
     size_t n_bytes = size - (n_words * sizeof(uint32_t));
     if (0 < n_bytes) {
-        uint32_t i32 = 0x0;
-        uint8_t* v4  = data_in + n_words * sizeof(uint32_t);
-        for (size_t i = 0; i < n_bytes; i++) {
-            i32 |= v4[i] << (8 * i);
-        }
-        ll_crc_write_data_reg(i32);
+        const uint8_t* not_aligned_word = data_in + n_words * sizeof(uint32_t);
+        uint32_t data                   = align_to_word(not_aligned_word, n_bytes);
+
+        ll_crc_write_data_reg(ctx, data);
     }
 
     return HAL_NO_ERR;
 }
 
-hal_err_t hal_crc_read(uint32_t* value_out) {
-    if (value_out == NULL) {
+hal_err_t hal_crc_read(CRC_TypeDef* ctx, uint32_t* value_out) {
+    if ((ctx == NULL) || (value_out == NULL)) {
         return HAL_ERR_PARAMS;
     }
 
-    ll_crc_store_crc();
-    ll_crc_reset();
+    ll_crc_store_crc(ctx);
+    ll_crc_reset(ctx);
 
-    (*value_out) = ll_crc_read_stored_crc();
-    return HAL_NO_ERR;
-}
-
-hal_err_t hal_crc_poly_init(uint32_t data) {
-    ll_crc_init_crc(data);
+    (*value_out) = ll_crc_read_stored_crc(ctx);
     return HAL_NO_ERR;
 }
