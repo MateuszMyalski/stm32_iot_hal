@@ -98,6 +98,6 @@ int bsp_init_periphs(void);
 /**
  * @brief Enables selected peripheral on selected board connector
  */
-hal_err_t bsp_ioctl(BSP_connector connector, BSP_periph_sel peripheral);
+int bsp_ioctl(BSP_connector connector, BSP_periph_sel peripheral);
 
 #endif

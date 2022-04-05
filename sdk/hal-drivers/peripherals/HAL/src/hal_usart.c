@@ -1,71 +1,32 @@
-
 #include "ll_usart.h"
 #include "hal_usart.h"
-
-#include "hal_gpio.h"
-#include "delay.h"
 
 
 // usart kernel clock frequency
 static uint32_t usart_kernel_clk = USART_DEFAULT_KCLK_SPEED;
 // todo: implement API obtain usart kernel clock
 
+static uint32_t timeout_ms = 0;
 
 
-/**
- * @brief Initializes IO lines for selected USART instance.
- * @param USART   CMSIS USART instance
- * @param io_port CMSIS GPIO port for TX and RX
- * @param tx_pin  transmitter pin number
- * @param rx_pin  receiver pin number
- */
-static void hal_usart_ioctl(USART_TypeDef *USART, GPIO_TypeDef *io_port, uint32_t tx_pin, uint32_t rx_pin) {
-
-    hal_gpio_open(io_port);
-
-    hal_gpio_ioctl(io_port, tx_pin, gpio_ioctl_af_7);
-    hal_gpio_ioctl(io_port, tx_pin, gpio_ioctl_alternate);
-    hal_gpio_ioctl(io_port, tx_pin, gpio_ioctl_push_pull);
-
-    hal_gpio_ioctl(io_port, rx_pin, gpio_ioctl_af_7);
-    hal_gpio_ioctl(io_port, rx_pin, gpio_ioctl_alternate);
-    hal_gpio_ioctl(io_port, rx_pin, gpio_ioctl_push_pull);
-}
-
-
-void hal_usart_open(USART_TypeDef *USART) {
-    ll_usart_pclk_start(USART);
-}
-
-
-void hal_usart_close(USART_TypeDef *USART) {
-    ll_usart_pclk_stop(USART);
-}
-
-
-hal_err_t hal_usart_init(USART_TypeDef *USART, USART_baud baud, GPIO_TypeDef *io_port, uint32_t tx_pin, uint32_t rx_pin) {
+hal_err_t hal_usart_open(USART_TypeDef *USART, USART_baud baud, USART_opmode mode) {
 
     uint32_t usartdiv = 0x0000;
 
-    // initialize gpios
-    hal_usart_ioctl(USART, io_port, tx_pin, rx_pin);
-
+    ll_usart_apb_enable(USART);
     usartdiv = (usart_kernel_clk);
 
     switch (baud) {
         case USART_BAUD_230400:
             usartdiv = (usartdiv / 230400) + 1;
-            ll_usart_rx_timeout_set(USART, 2304);
             break;
 
         case USART_BAUD_115200:
             usartdiv = (usartdiv / 115200) + 1;
-            ll_usart_rx_timeout_set(USART, 1152);
             break;
 
         case USART_BAUD_9600:
             usartdiv = (usartdiv / 9600) + 1;
-            ll_usart_rx_timeout_set(USART, 96);
             break;
 
         default:
@@ -73,6 +34,9 @@ hal_err_t hal_usart_init(USART_TypeDef *USART, USART_baud baud, GPIO_TypeDef *io
     }
 
     ll_usart_set_baud_register(USART, usartdiv);
+
+    if(mode == USART_OPMODE_FIFO)
+        ll_usart_fifo_mode_enable(USART);
 
     ll_usart_tx_enable(USART);
     ll_usart_rx_enable(USART);
@@ -83,18 +47,66 @@ hal_err_t hal_usart_init(USART_TypeDef *USART, USART_baud baud, GPIO_TypeDef *io
 }
 
 
-int hal_usart_tx(USART_TypeDef *USART, uint8_t *tx_buffer, uint8_t nbytes) {
+void hal_usart_reset(USART_TypeDef *USART) {
+    ll_usart_reset(USART);
+}
 
-    for (int i = 0; i < nbytes; ++i) {
-        ll_usart_tx_write(USART, tx_buffer[i]);
 
-        while (!is_usart_tx_empty(USART)) {
-            // wait until data register becomes empty
-        }
+hal_err_t hal_usart_ioctl(USART_TypeDef *USART, USART_ioctl param, void *value) {
+
+    switch (param) {
+
+        case USART_IOCTL_PERIPH_TIMEOUT_ENABLE:
+            ll_usart_rx_timeout_enable(USART);
+            break;
+
+        case USART_IOCTL_PERIPH_TIMEOUT_DISABLE:
+            ll_usart_rx_timeout_disable(USART);
+            break;
+
+        case USART_IOCTL_PERIPH_TIMEOUT:
+            if(NULL == value)
+                return HAL_ERR_PARAMS;
+            ll_usart_rx_timeout_set(USART, *((uint32_t *)value));
+            break;
+
+        case USART_IOCTL_BLOCKING_TIMEOUT:
+            if(NULL == value)
+                return HAL_ERR_PARAMS;
+            timeout_ms = *((uint32_t *)value);
+
+            /*TODO: implement blocking */
+
+            break;
+
+        default:
+            return HAL_ERR_PARAMS;
     }
 
-    while (!is_usart_tx_complete(USART)) {
-        // wait untill the last frame leaves the shift register
+    return HAL_NO_ERR;
+ }
+
+
+void hal_usart_close(USART_TypeDef *USART) {
+    ll_usart_reset(USART);
+    ll_usart_apb_disable(USART);
+}
+
+
+int hal_usart_tx(USART_TypeDef *USART, uint8_t *tx_buffer, size_t nbytes) {
+
+    for (int i = 0; i < nbytes; ++i) {
+        ll_usart_send_byte(USART, tx_buffer[i]);
+    }
+
+    while (!ll_is_usart_tx_complete(USART)) { 
+
+        /** RM0456 p.2263:  Character transmission procedure, point 8:
+         * When the  last data is  written to the  USART_TDR register,
+         * wait until TC=1. This check is required to avoid corrupting
+         * the last transmission when the  USART is disabled or enters
+         * Halt mode.                                               */
+        asm("nop");
     }
 
     ll_usart_confirm(USART, USART_TX_COMPLETE);
@@ -103,23 +115,23 @@ int hal_usart_tx(USART_TypeDef *USART, uint8_t *tx_buffer, uint8_t nbytes) {
 }
 
 
-int hal_usart_rx(USART_TypeDef *USART, uint8_t *rx_buffer, uint8_t nbytes) {
+int hal_usart_rx(USART_TypeDef *USART, uint8_t *rx_buffer, size_t nbytes) {
 
     int i;
 
-    ll_usart_rx_timeout_emable(USART);  // Enable receiver timeout
+    //ll_usart_rx_timeout_enable(USART2);
 
     for (i = 0; i < nbytes; ++i) {
-        while (!is_usart_rx_empty(USART)) {
-            if (is_usart_rx_timeout(USART)) {
+        while (!ll_is_usart_rx_data(USART)) {
+            if (ll_is_usart_rx_timeout(USART)) {
                 goto exit;
             }
         }
-        rx_buffer[i] = ll_usart_rx_read(USART);
+        rx_buffer[i] = ll_usart_read_byte(USART);
     }
 
-    while (!is_usart_rx_idle(USART)) {
-        if (is_usart_rx_timeout(USART)) {
+    while (!ll_is_usart_rx_idle(USART)) {
+        if (ll_is_usart_rx_timeout(USART)) {
 
             ll_usart_rx_discard(USART);
             goto exit;
@@ -129,8 +141,7 @@ int hal_usart_rx(USART_TypeDef *USART, uint8_t *rx_buffer, uint8_t nbytes) {
 exit:
 
     ll_usart_confirm(USART, USART_RX_TIMEOUT | USART_RX_OVERRUN | USART_RX_IDLE);
-
-    ll_usart_rx_timeout_disable(USART);
+    //ll_usart_rx_timeout_disable(USART2);
     ll_usart_rx_discard(USART);
 
     return i; // return number od bytes read
