@@ -119,8 +119,6 @@ int hal_usart_rx(USART_TypeDef *USART, uint8_t *rx_buffer, size_t nbytes) {
 
     int i;
 
-    //ll_usart_rx_timeout_enable(USART2);
-
     for (i = 0; i < nbytes; ++i) {
         while (!ll_is_usart_rx_data(USART)) {
             if (ll_is_usart_rx_timeout(USART)) {
@@ -141,7 +139,6 @@ int hal_usart_rx(USART_TypeDef *USART, uint8_t *rx_buffer, size_t nbytes) {
 exit:
 
     ll_usart_confirm(USART, USART_RX_TIMEOUT | USART_RX_OVERRUN | USART_RX_IDLE);
-    //ll_usart_rx_timeout_disable(USART2);
     ll_usart_rx_discard(USART);
 
     return i; // return number od bytes read
