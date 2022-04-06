@@ -6,8 +6,6 @@
 static uint32_t usart_kernel_clk = USART_DEFAULT_KCLK_SPEED;
 // todo: implement API obtain usart kernel clock
 
-static uint32_t timeout_ms = 0;
-
 
 hal_err_t hal_usart_open(USART_TypeDef *USART, USART_baud baud, USART_opmode mode) {
 
