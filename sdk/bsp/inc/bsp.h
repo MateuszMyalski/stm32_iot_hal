@@ -94,9 +94,4 @@ int bsp_init_led(void);
  */
 int bsp_init_periphs(void);
 
-/**
- * @brief Enables selected peripheral on selected board connector
- */
-int bsp_ioctl(BSP_connector connector, BSP_periph_sel peripheral);
-
 #endif

@@ -28,7 +28,7 @@ hal_err_t hal_usart_open(USART_TypeDef *USART, USART_baud baud, USART_opmode mod
             break;
 
         default:
-            break;
+            return HAL_ERR_PARAMS;
     }
 
     ll_usart_set_baud_register(USART, usartdiv);
