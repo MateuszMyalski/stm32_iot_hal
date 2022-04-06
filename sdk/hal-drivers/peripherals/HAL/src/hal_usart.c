@@ -70,15 +70,6 @@ hal_err_t hal_usart_ioctl(USART_TypeDef *USART, USART_ioctl param, void *value) 
             ll_usart_rx_timeout_set(USART, *((uint32_t *)value));
             break;
 
-        case USART_IOCTL_BLOCKING_TIMEOUT:
-            if(NULL == value)
-                return HAL_ERR_PARAMS;
-            timeout_ms = *((uint32_t *)value);
-
-            /*TODO: implement blocking */
-
-            break;
-
         default:
             return HAL_ERR_PARAMS;
     }
