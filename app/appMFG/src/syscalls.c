@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
+#include "serial_stdio.h"
 #include "stm32u585xx.h"
 
 #ifndef EOF
@@ -9,6 +10,21 @@
 #endif // EOF
 
 extern int errno;
+
+static USART_TypeDef *stdio_usart_instsnce = NULL;
+
+
+void serial_stdio_init(USART_TypeDef * instance) {
+
+    if(NULL == instance) {
+        while (1) {
+            __asm("NOP");
+            // Hang the device
+        }
+    }
+
+    stdio_usart_instsnce = instance;
+}
 
 int _kill(int pid, int sig) {
     errno = EINVAL;
@@ -48,6 +64,15 @@ caddr_t _sbrk(int incr) {
 int putchar(signed int c) {
 #ifdef USE_ITM_WRITE
     ITM_SendChar(c);
+#else
+    if(NULL == stdio_usart_instsnce) {
+        while (1) {
+            __asm("NOP");
+            // Hang the device
+        }
+    }
+
+    hal_usart_putchar(stdio_usart_instsnce, (char)c);
 #endif  // USE_ITM_WRITE
 
     return c;

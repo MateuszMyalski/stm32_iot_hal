@@ -84,9 +84,32 @@ void hal_usart_close(USART_TypeDef *USART) {
 
 int hal_usart_tx(USART_TypeDef *USART, uint8_t *tx_buffer, size_t nbytes) {
 
-    for (int i = 0; i < nbytes; ++i) {
+    int i;
+
+    for (i = 0; i < nbytes; ++i) {
         ll_usart_send_byte(USART, tx_buffer[i]);
     }
+
+    while (!ll_is_usart_tx_complete(USART)) { 
+
+        /** RM0456 p.2263:  Character transmission procedure, point 8:
+         * When the  last data is  written to the  USART_TDR register,
+         * wait until TC=1. This check is required to avoid corrupting
+         * the last transmission when the  USART is disabled or enters
+         * Halt mode.                                               */
+        asm("nop");
+    }
+
+    ll_usart_confirm(USART, USART_TX_COMPLETE);
+
+    return i;
+}
+
+
+hal_err_t hal_usart_putchar(USART_TypeDef *USART, char c) {
+
+    ll_usart_send_byte(USART, (uint8_t)c);
+
 
     while (!ll_is_usart_tx_complete(USART)) { 
 
