@@ -97,7 +97,6 @@ int hal_usart_tx(USART_TypeDef *USART, uint8_t *tx_buffer, size_t nbytes) {
          * wait until TC=1. This check is required to avoid corrupting
          * the last transmission when the  USART is disabled or enters
          * Halt mode.                                               */
-        asm("nop");
     }
 
     ll_usart_confirm(USART, USART_TX_COMPLETE);
@@ -118,7 +117,6 @@ hal_err_t hal_usart_putchar(USART_TypeDef *USART, char c) {
          * wait until TC=1. This check is required to avoid corrupting
          * the last transmission when the  USART is disabled or enters
          * Halt mode.                                               */
-        asm("nop");
     }
 
     ll_usart_confirm(USART, USART_TX_COMPLETE);
