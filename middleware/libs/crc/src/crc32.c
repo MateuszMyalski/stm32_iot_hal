@@ -71,7 +71,7 @@ uint32_t crc32(const crc32_ctx_t *ctx, const uint8_t *data_in, size_t size) {
 
     uint32_t crc = ctx->init_crc;
 
-    /* Calculate how many even words contain the array (floor the division) */
+    /* Calculate how many even words the array contains (floor the division) */
     size_t n_words = size / sizeof(uint32_t);
 
     /* Calculate CRC of even 32bit-words */

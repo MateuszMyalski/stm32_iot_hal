@@ -147,8 +147,12 @@ static uint32_t eeprom_crc(const partition_entry_t *partition_name, const uint8_
     hal_crc_read(CRC, &crc);
     hal_crc_close(CRC);
 #else
-    crc32_ctx_t crc_ctx = {
-        .polynomial = polynomial, .init_crc = init_crc, .in_reversed = CRC32_IN_BYTE_REVERSE, .out_reversed = true};
+    crc32_ctx_t crc_ctx  = {};
+    crc_ctx.polynomial   = polynomial;
+    crc_ctx.init_crc     = init_crc;
+    crc_ctx.in_reversed  = CRC32_IN_BYTE_REVERSE;
+    crc_ctx.out_reversed = true;
+
     crc = crc32(&crc_ctx, data, size);
 #endif  // USE_HW_ACCELERATED_CRC
 
