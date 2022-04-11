@@ -52,6 +52,7 @@ include $(APP_PATH)/module.cfg
 include $(SDK_PATH)/module.mk
 include $(MIDDLEWARE_PATH)/libs/mempart/module.mk
 include $(MIDDLEWARE_PATH)/libs/logger/module.mk
+include $(MIDDLEWARE_PATH)/libs/crc/module.mk
 
 .SECONDEXPANSION:
 $(TARGET).elf: $$(OBJS) $(LIBS)
