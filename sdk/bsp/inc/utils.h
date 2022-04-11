@@ -8,12 +8,10 @@
         }               \
     } while (0);
 
-#define Assert(_expression, _expected)      \
-    do {                                    \
-        if ((_expression) != (_expected)) { \
-            while (1)                       \
-                ;                           \
-        }                                   \
-    } while (0);
+#define Assert(_expr) do{    \
+ while(!(_expr)) {           \
+     /* Hang me up to dry */ \
+     }                       \
+}while(0);
 
 #endif

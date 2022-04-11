@@ -25,16 +25,16 @@ int bsp_init(void) {
 #endif  // USE_SEMIHOSTING
 
     err = bsp_init_clock();
-    Assert(err, 0);
+    Assert(err);
 
     err = SysTick_Config(SystemCoreClock / 1000);
-    Assert(err, 0);
+    Assert(err);
 
     err = bsp_init_led();
-    Assert(err, 0);
+    Assert(err);
 
     err = bsp_init_periphs();
-    Assert(err, 0);
+    Assert(err);
 
     return err;
 }

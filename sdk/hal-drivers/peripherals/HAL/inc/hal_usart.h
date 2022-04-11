@@ -103,6 +103,15 @@ int hal_usart_tx(USART_TypeDef *USART, uint8_t *tx_buffer, size_t nbytes);
 
 
 /**
+ * @brief Transmitts single character via selected USART instance.
+ * @param USART CMSIS USART instance
+ * @param c     character to send
+ * @return HAL_NO_ERR if success or error code otherwise
+ */
+hal_err_t hal_usart_putchar(USART_TypeDef *USART, char c);
+
+
+/**
  * @brief Reads the incoming data from selected USART instance.
  * @param USART      CMSIS USART instance
  * @param tx_buffer  data buffer handle

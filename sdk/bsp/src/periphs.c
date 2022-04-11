@@ -106,6 +106,9 @@ int bsp_init_periphs() {
     err = hal_gpio_ioctl(BSP_PMOD_PERIPH_SEL_PORT, BSP_PMOD_PERIPH_SEL_PIN, gpio_ioctl_open_drain);
     ExitOnError(err);
 
+    // switch USART2 output PMOD connector
+    bsp_ioctl(BSP_PMOD, BSP_PMOD_USART2);
+
 exit:
     return err;
 }

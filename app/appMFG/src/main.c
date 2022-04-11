@@ -5,9 +5,14 @@
 #include "hts221_test.h"
 #include "led_notifier.h"
 #include "logger.h"
+#include "hal_usart.h"
+#include "bsp_utils.h"
+#include "serial_stdio.h"
 
 int main() {
     bsp_init();
+    serial_stdio_init(USART2);
+
     init_ee_storage();
 
     LOG_INFO("Build: " BUILD_USER "\r\n");

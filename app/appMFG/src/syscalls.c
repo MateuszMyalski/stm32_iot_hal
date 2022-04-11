@@ -2,13 +2,22 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
+#include "serial_stdio.h"
 #include "stm32u585xx.h"
+#include "utils.h"
 
 #ifndef EOF
 #define EOF (-1)
 #endif // EOF
 
 extern int errno;
+
+static USART_TypeDef *stdio_usart_instance = NULL;
+
+
+void serial_stdio_init(USART_TypeDef * instance) {
+    stdio_usart_instance = instance;
+}
 
 int _kill(int pid, int sig) {
     errno = EINVAL;
@@ -48,6 +57,8 @@ caddr_t _sbrk(int incr) {
 int putchar(signed int c) {
 #ifdef USE_ITM_WRITE
     ITM_SendChar(c);
+#else
+    hal_usart_putchar(stdio_usart_instance, (char)c);
 #endif  // USE_ITM_WRITE
 
     return c;
@@ -60,6 +71,9 @@ void _putchar(char character) {
 #endif  // USE_TINY_PRINTF
 
 int _write(int file, char *ptr, int len) {
+
+    Assert(stdio_usart_instance);
+
     for (int data_idx = 0; data_idx < len; data_idx++) {
         putchar(*ptr++);
     }
