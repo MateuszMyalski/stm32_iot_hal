@@ -72,7 +72,7 @@ void _putchar(char character) {
 
 int _write(int file, char *ptr, int len) {
 
-    Assert(stdio_usart_instance);
+    Assert(NULL == stdio_usart_instance);
 
     for (int data_idx = 0; data_idx < len; data_idx++) {
         putchar(*ptr++);
