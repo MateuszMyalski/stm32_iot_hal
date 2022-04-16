@@ -1,7 +1,7 @@
 #ifndef APP_EE_STORAGE_H
 #define APP_EE_STORAGE_H
 
-#include "eeprom.h"
+#include "m24256.h"
 #include "mempart.h"
 #include "eeprom_map.h"
 

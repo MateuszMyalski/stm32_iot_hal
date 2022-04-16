@@ -1,5 +1,5 @@
-#ifndef DEVICES_EEPROM_H
-#define DEVICES_EEPROM_H
+#ifndef M24256_H
+#define M24256_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -32,7 +32,7 @@ typedef struct {
  * @param ms_tick_source - Milisecond tick source variable. (Can be null in case not using)
  * @return EEPROM Error code. 0 - Success
  */
-eeprom_err_t eeprom_init(eeprom_ctx_t *eeprom_ctx, uint8_t device_address, I2C_TypeDef *I2C,
+eeprom_err_t m24256_init(eeprom_ctx_t *eeprom_ctx, uint8_t device_address, I2C_TypeDef *I2C,
                          const uint32_t *ms_tick_source);
 
 /**
@@ -41,7 +41,7 @@ eeprom_err_t eeprom_init(eeprom_ctx_t *eeprom_ctx, uint8_t device_address, I2C_T
  * @param timeout_ms - Timeout in ms. 0 - means no timeout (defualt)
  * @return EEPROM Error code. 0 - Success
  */
-eeprom_err_t eeprom_set_timeout(eeprom_ctx_t *eeprom_ctx, uint32_t timeout_ms);
+eeprom_err_t m24256_set_timeout(eeprom_ctx_t *eeprom_ctx, uint32_t timeout_ms);
 
 /**
  * @brief Write data to the eeprom memory
@@ -51,7 +51,7 @@ eeprom_err_t eeprom_set_timeout(eeprom_ctx_t *eeprom_ctx, uint32_t timeout_ms);
  * @param size - data to write length
  * @return EEPROM Error code. 0 - Success
  */
-eeprom_err_t eeprom_write(eeprom_ctx_t *eeprom_ctx, uint16_t mem_addr, const uint8_t *data, size_t size);
+eeprom_err_t m24256_write(eeprom_ctx_t *eeprom_ctx, uint16_t mem_addr, const uint8_t *data, size_t size);
 
 /**
  * @brief Read data to the eeprom memory
@@ -61,6 +61,6 @@ eeprom_err_t eeprom_write(eeprom_ctx_t *eeprom_ctx, uint16_t mem_addr, const uin
  * @param size - data to read length
  * @return EEPROM Error code. 0 - Success
  */
-eeprom_err_t eeprom_read(eeprom_ctx_t *eeprom_ctx, uint16_t mem_addr, uint8_t *data, size_t size);
+eeprom_err_t m24256_read(eeprom_ctx_t *eeprom_ctx, uint16_t mem_addr, uint8_t *data, size_t size);
 
 #endif
