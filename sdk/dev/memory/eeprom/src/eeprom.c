@@ -1,8 +1,8 @@
-#include "m24256.h"
+#include "eeprom.h"
 
 #include "ll_i2c.h"
 
-eeprom_err_t m24256_init(eeprom_ctx_t *eeprom_ctx, uint8_t device_address, I2C_TypeDef *I2C,
+eeprom_err_t eeprom_init(eeprom_ctx_t *eeprom_ctx, uint8_t device_address, I2C_TypeDef *I2C,
                          const uint32_t *ms_tick_source) {
     if ((NULL == eeprom_ctx) || (NULL == I2C)) {
         return EEPROM_ERR_PARAMS;
@@ -15,7 +15,7 @@ eeprom_err_t m24256_init(eeprom_ctx_t *eeprom_ctx, uint8_t device_address, I2C_T
     return EEPROM_NO_ERR;
 }
 
-eeprom_err_t m24256_write(eeprom_ctx_t *eeprom_ctx, uint16_t mem_addr, const uint8_t *data, size_t size) {
+eeprom_err_t eeprom_write(eeprom_ctx_t *eeprom_ctx, uint16_t mem_addr, const uint8_t *data, size_t size) {
     if ((NULL == eeprom_ctx) || (NULL == data)) {
         return EEPROM_ERR_PARAMS;
     }
@@ -62,7 +62,7 @@ retry:
     return EEPROM_NO_ERR;
 }
 
-eeprom_err_t m24256_read(eeprom_ctx_t *eeprom_ctx, uint16_t mem_addr, uint8_t *data, size_t size) {
+eeprom_err_t eeprom_read(eeprom_ctx_t *eeprom_ctx, uint16_t mem_addr, uint8_t *data, size_t size) {
     if ((NULL == eeprom_ctx) || (NULL == data)) {
         return EEPROM_ERR_PARAMS;
     }
@@ -116,7 +116,7 @@ retry:
     return EEPROM_NO_ERR;
 }
 
-eeprom_err_t m24256_set_timeout(eeprom_ctx_t *eeprom_ctx, uint32_t timeout_ms) {
+eeprom_err_t eeprom_set_timeout(eeprom_ctx_t *eeprom_ctx, uint32_t timeout_ms) {
     if ((NULL == eeprom_ctx) || (NULL == eeprom_ctx->ms_tick_source)) {
         return EEPROM_ERR_PARAMS;
     }

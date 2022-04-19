@@ -99,7 +99,7 @@ void ee_storage_get_device_info(part_device_info_t *device_info) {
 static int eeprom_tx_data(uint16_t mem_addr, const uint8_t *data, size_t size) {
     int err = 0;
 
-    err = m24256_write(&eeprom_ctx, mem_addr, data, size);
+    err = eeprom_write(&eeprom_ctx, mem_addr, data, size);
 
     return err;
 }
@@ -107,7 +107,7 @@ static int eeprom_tx_data(uint16_t mem_addr, const uint8_t *data, size_t size) {
 static int eeprom_rx_data(uint16_t mem_addr, uint8_t *data, size_t size) {
     int err = 0;
 
-    err = m24256_read(&eeprom_ctx, mem_addr, data, size);
+    err = eeprom_read(&eeprom_ctx, mem_addr, data, size);
 
     return err;
 }
@@ -162,12 +162,12 @@ static uint32_t eeprom_crc(const partition_entry_t *partition_name, const uint8_
 int init_ee_storage(void) {
     eeprom_err_t err = EEPROM_NO_ERR;
 
-    err = m24256_init(&eeprom_ctx, BSP_EEPROM_ADDR, BSP_EEPROM_I2C, (uint32_t *)&SysTick_msTicks);
+    err = eeprom_init(&eeprom_ctx, BSP_EEPROM_ADDR, BSP_EEPROM_I2C, (uint32_t *)&SysTick_msTicks);
     if (EEPROM_NO_ERR != err) {
         led_notifier_error_blink();
     }
 
-    err = m24256_set_timeout(&eeprom_ctx, 100);
+    err = eeprom_set_timeout(&eeprom_ctx, 100);
     if (EEPROM_NO_ERR != err) {
         led_notifier_error_blink();
     }
