@@ -1,5 +1,5 @@
-#ifndef M24256_H
-#define M24256_H
+#ifndef DEVICES_EEPROM_H
+#define DEVICES_EEPROM_H
 
 #include <stddef.h>
 #include <stdint.h>
