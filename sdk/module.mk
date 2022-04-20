@@ -5,8 +5,9 @@ SDK_OUT_PATH   := $(OUT_PATH)/sdk
 TARGET_SDK     := $(SDK_OUT_PATH)/libsdk.a
 LIBS           += $(TARGET_SDK)
 
-include $(MODULE_DIR_SDK)hal-drivers/module.mk
 include $(MODULE_DIR_SDK)bsp/module.mk
+include $(MODULE_DIR_SDK)dev/module.mk
+include $(MODULE_DIR_SDK)hal/module.mk
 
 $(TARGET_SDK) : OBJS := $(patsubst $(SDK_PATH)/%.c, $(SDK_OUT_PATH)/%.o, $(CFILES))
 
